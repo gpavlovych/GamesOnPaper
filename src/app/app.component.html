@@ -4,40 +4,43 @@
       <a class="navbar-brand" href="#">Games on paper</a>
     </div>
     <ul class="nav navbar-nav" *ngIf="user != null">
-      <li>
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Create game</a>
-        <ul class="dropdown-menu">
+      <li dropdown>
+        <a href="#" class="dropdown-toggle" dropdownToggle>Create game</a>
+        <ul class="dropdown-menu" dropdownMenu>
           <li class="dropdown-header">Invite user to play</li>
-          <li *ngFor="let gameToBeCreated of gamesToBeCreated"><a href="#">{{gameToBeCreated}}</a></li>
+          <li *ngFor="let gameToBeCreated of gamesToBeCreated"><img class="img-circle" width="24" height="24" src="{{gameToBeCreated.icon}}"/> <a href="#">{{gameToBeCreated.name}}</a></li>
+          <li *ngIf="gamesToBeCreatedTotalCount>10"><a href="#">Show more</a></li>
         </ul>
       </li>
-      <li>
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invitations <span class="badge">5</span></a>
-        <ul class="dropdown-menu">
+      <li dropdown>
+        <a href="#" class="dropdown-toggle" dropdownToggle>Invitations <span class="badge">5</span></a>
+        <ul class="dropdown-menu" dropdownMenu>
           <li class="dropdown-header">Incoming invitations</li>
           <li *ngFor="let incomingInvitation of incomingInvitations">
             <a href="#">
-              <img src="{{incomingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
-              {{incomingInvitation.userName}} invited you to play {{incomingInvitation.gameName}}!
+              <img src="{{incomingInvitation.player1.userPic}}" class="img-circle" width="50" height="50"/>
+              {{incomingInvitation.player1.userName}} invited you to play {{incomingInvitation.gameDefinitionName}}!
               <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button>
               <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
             </a>
           </li>
+          <li *ngIf="incomingInvitationsTotalCount>10"><a href="#">Show more</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Outgoing invitations</li>
           <li *ngFor="let outgoingInvitation of outgoingInvitations">
             <a href="#">
-              <img src="{{outgoingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
-              {{outgoingInvitation.userName}} invited to play {{outgoingInvitation.gameName}} with you!
+              <img src="{{outgoingInvitation.player2.userPic}}" class="img-circle" width="50" height="50"/>
+              {{outgoingInvitation.player2.userName}} invited to play {{outgoingInvitation.gameDefinitionName}} with you!
               <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
             </a>
           </li>
+          <li *ngIf="outgoingInvitationsTotalCount>10"><a href="#">Show more</a></li>
         </ul>
       </li>
-      <li>
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Active Games <span class="badge">5</span></a>
-        <ul class="dropdown-menu">
-          <template ngFor let-game [ngForOf]="activeGames | groupBy: 'gameName'">
+      <li dropdown>
+        <a href="#" class="dropdown-toggle" dropdownToggle>Active Games <span class="badge">5</span></a>
+        <ul class="dropdown-menu" dropdownMenu>
+          <template ngFor let-game [ngForOf]="activeGames | groupBy: 'gameDefinitionName'">
             <li class="dropdown-header">{{game.key}}</li>
             <li *ngFor="let activeGame of game.value">
               <a href="#">
@@ -55,15 +58,16 @@
                   </span>
               </a>
             </li>
+            <li *ngIf="activeGamesTotalCount>10"><a href="#">Show more</a></li>
             <li class="divider"></li>
           </template>
         </ul>
       </li>
-      <li>
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Finished Games <span class="badge">5</span></a>
-        <ul class="dropdown-menu">
+      <li dropdown>
+        <a href="#" class="dropdown-toggle" dropdownToggle>Finished Games <span class="badge">5</span></a>
+        <ul class="dropdown-menu" dropdownMenu>
           <!--[ngfor]="let (key, games) of finishedGames | groupBy: 'gameName'"-->
-          <template ngFor let-game [ngForOf]="finishedGames | groupBy: 'gameName'">
+          <template ngFor let-game [ngForOf]="finishedGames | groupBy: 'gameDefinitionName'">
             <li class="dropdown-header">{{game.key}}</li>
             <li *ngFor="let finishedGame of game.value">
               <a href="#">
@@ -73,12 +77,12 @@
             </li>
             <li class="divider"></li>
           </template>
-          <li><a href="#">Show more</a></li>
+          <li *ngIf="finishedGamesTotalCount>10"><a href="#">Show more</a></li>
         </ul>
       </li>
     </ul>
     <ul class="nav navbar-nav navbar-right" *ngIf="user!=null">
-      <li><a class="navbar-brand"><strong><span><img class="img-circle" width="24" height="24" src="{{user.avatar}}"/></span> {{user.username}}</strong></a></li>
+      <li><a class="navbar-brand"><strong><span><img class="img-circle" width="24" height="24" src="{{user.userPic}}"/></span> {{user.userName}}</strong></a></li>
       <li><a href="#/login" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span> Logout</strong></a></li>
     </ul>
   </div>
@@ -104,8 +108,8 @@
           <th>#</th>
           <th>User</th>
         </tr>
-        <tr *ngFor="let top100Player of top100Players">
-          <td>{{$index+1}}</td>
+        <tr *ngFor="let top100Player of top100Players; let top100PlayerRank=index">
+          <td>{{top100PlayerRank+1}}</td>
           <td><img src="{{top100Player.userPic}}" class="img-circle" width="50" height="50"/> {{top100Player.userName}}</td>
         </tr>
         <tr>
