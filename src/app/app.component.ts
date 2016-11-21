@@ -10,6 +10,11 @@ export class AppComponent {
   public constructor(componentsHelper:ComponentsHelper, vcr:ViewContainerRef) {
     componentsHelper.setRootViewContainerRef(vcr);
   }
-
+  gamesToBeCreated=[];
+  incomingInvitations=[];
+  outgoingInvitations=[];
+  activeGames=[];
+  finishedGames=[];
+  top100Players=[];
   title = 'app works!';
 }

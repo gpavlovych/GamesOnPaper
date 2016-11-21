@@ -10,7 +10,8 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { HomeComponent } from './home/home.component';
 import { GameTicTacToeComponent } from './game-tic-tac-toe/game-tic-tac-toe.component';
 import { DisplayCrossZeroPipe } from './game-tic-tac-toe/display-cross-zero.pipe';
-import {ComponentsHelper} from 'ng2-bootstrap/ng2-bootstrap'
+import {ComponentsHelper} from 'ng2-bootstrap/ng2-bootstrap';
+import { GroupByPipe } from './group-by.pipe'
 
 const appRoutes: Routes = [
   {path:'tictactoe', component: GameTicTacToeComponent},
@@ -26,7 +27,8 @@ const appRoutes: Routes = [
     PageNotFoundComponent,
     HomeComponent,
     GameTicTacToeComponent,
-    DisplayCrossZeroPipe
+    DisplayCrossZeroPipe,
+    GroupByPipe
   ],
   imports: [
     BrowserModule,
