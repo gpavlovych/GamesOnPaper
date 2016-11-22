@@ -1,3 +1,128 @@
-<p>
-  home works!
-</p>
+<!--<div class="container">-->
+<!--<h3>Masonry CSS with Bootstrap Panels</h3>-->
+<div class="row">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create Game</h3>
+    </div>
+    <div class="panel-body">
+      <h4>Invite users to play</h4>
+      <table class="table">
+        <tr *ngFor="let gameToBeCreated of gamesToBeCreated"><td><a href="creategame/{{gameToBeCreated.id}}">{{gameToBeCreated.name}}</a></td></tr>
+      </table>
+    </div>
+    <div class="panel-footer">
+      Show more...
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Incoming invitations</h3>
+    </div>
+    <div class="panel-body">
+      <h4>Invitations you've received</h4>
+      <table class="table">
+        <template ngFor let-incomingInvitation [ngForOf]="incomingInvitations">
+          <tr>
+            <td>
+              <img src="{{incomingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
+              {{incomingInvitation.players[0].userName}} invited you to play {{incomingInvitation.gameDefinition.name}}!
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="button" class="btn btn-default">Accept</button>
+              <button type="button" class="btn btn-default">Decline</button>
+            </td>
+          </tr>
+        </template>
+      </table>
+    </div>
+    <div class="panel-footer">
+      Show more...
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Outgoing invitations</h3>
+    </div>
+    <div class="panel-body">
+      <h4>Invitations you've sent</h4>
+      <table class="table">
+        <template ngFor let-outgoingInvitation [ngForOf]="outgoingInvitations">
+          <template ngFor let-outgoingInvitationUser [ngForOf]="outgoingInvitation.players" let-i="index">
+            <tr *ngIf="i!=outgoingInvitation.activePlayer">
+              <td>
+                <img src="{{outgoingInvitationUser.userPic}}" class="img-circle" width="50" height="50"/>
+                {{outgoingInvitationUser.userName}} invited to play {{outgoingInvitation.gameDefinition.Name}} with you!
+              </td>
+            </tr>
+            <tr *ngIf="i!=outgoingInvitation.activePlayer">
+              <td>
+                <button type="button" class="btn btn-default">Decline</button>
+              </td>
+            </tr>
+          </template>
+        </template>
+      </table>
+    </div>
+    <div class="panel-footer">
+      Show more...
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Active Games</h3>
+    </div>
+    <div class="panel-body">
+      <h4>Games which are being played now</h4>
+      <table class="table">
+        <template ngFor let-activeGameGrouped [ngForOf]="activeGames  | groupBy: 'gameDefinition.name'">
+          <tr>
+            <td><h5>{{activeGameGrouped.key}}</h5></td>
+          </tr>
+          <template ngFor let-activeGame [ngForOf]="activeGameGrouped.value">
+            <tr>
+              <td>
+                <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
+                  <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
+                </template>
+              </td>
+            </tr>
+          </template>
+        </template>
+      </table>
+    </div>
+    <div class="panel-footer">
+      Show more
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Finished Games</h3>
+    </div>
+    <div class="panel-body">
+      <h4>Games which are finished</h4>
+      <table class="table">
+        <template ngFor let-finishedGameGrouped [ngForOf]="finishedGames  | groupBy: 'gameDefinition.name'">
+          <tr>
+            <td><h5>{{finishedGameGrouped.key}}</h5></td>
+          </tr>
+          <template ngFor let-finishedGame [ngForOf]="finishedGameGrouped.value">
+            <tr>
+              <td>
+                <template ngFor let-player [ngForOf]="finishedGame.players" let-i="index">
+                  <label class="label" [ngClass]="{'label-default': finishedGame.winner==null, 'label-success': finishedGame.winner==i, 'label-danger': finishedGame.winner!=null && finishedGame.winner!=i}">{{player.userName}}</label>
+                </template>
+              </td>
+            </tr>
+          </template>
+        </template>
+      </table>
+    </div>
+    <div class="panel-footer">
+      Show more...
+    </div>
+  </div>
+</div>
+<!--</div>-->

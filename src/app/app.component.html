@@ -18,8 +18,8 @@
           <li class="dropdown-header">Incoming invitations</li>
           <li *ngFor="let incomingInvitation of incomingInvitations">
             <a href="#">
-              <img src="{{incomingInvitation.player1.userPic}}" class="img-circle" width="50" height="50"/>
-              {{incomingInvitation.player1.userName}} invited you to play {{incomingInvitation.gameDefinitionName}}!
+            <!--  <img src="{{incomingInvitation.player1.userPic}}" class="img-circle" width="50" height="50"/>-->
+              {{incomingInvitation.players[0].userName}} invited you to play {{incomingInvitation.gameDefinition.name}}!
               <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button>
               <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
             </a>
@@ -29,8 +29,8 @@
           <li class="dropdown-header">Outgoing invitations</li>
           <li *ngFor="let outgoingInvitation of outgoingInvitations">
             <a href="#">
-              <img src="{{outgoingInvitation.player2.userPic}}" class="img-circle" width="50" height="50"/>
-              {{outgoingInvitation.player2.userName}} invited to play {{outgoingInvitation.gameDefinitionName}} with you!
+            <!--  <img src="{{outgoingInvitation.player2.userPic}}" class="img-circle" width="50" height="50"/> -->
+              {{outgoingInvitation.players[1].userName}} invited to play {{outgoingInvitation.gameDefinition.name}} with you!
               <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
             </a>
           </li>
@@ -40,12 +40,12 @@
       <li dropdown>
         <a href="#" class="dropdown-toggle" dropdownToggle>Active Games <span class="badge">5</span></a>
         <ul class="dropdown-menu" dropdownMenu>
-          <template ngFor let-game [ngForOf]="activeGames | groupBy: 'gameDefinitionName'">
+          <template ngFor let-game [ngForOf]="activeGames | groupBy: 'gameDefinition.name'">
             <li class="dropdown-header">{{game.key}}</li>
             <li *ngFor="let activeGame of game.value">
               <a href="#">
-                <img src="{{activeGame.userPic}}" class="img-circle" width="50" height="50"/>
-                {{activeGame.userName}} <label class="label" [ngClass]="{'label-default': activeGame.yourScore==activeGame.opponentScore, 'label-success': activeGame.yourScore>activeGame.opponentScore, 'label-danger': activeGame.yourScore<activeGame.opponentScore}">{{activeGame.yourScore}}:{{activeGame.opponentScore}}</label>
+                <!-- <img src="{{activeGame.userPic}}" class="img-circle" width="50" height="50"/> -->
+              <!--  {{activeGame.userName}} <label class="label" [ngClass]="{'label-default': activeGame.yourScore==activeGame.opponentScore, 'label-success': activeGame.yourScore>activeGame.opponentScore, 'label-danger': activeGame.yourScore<activeGame.opponentScore}">{{activeGame.yourScore}}:{{activeGame.opponentScore}}</label>-->
                 <button type="button" class="btn btn-default" *ngIf="!activeGame.finishedBy"><span class="glyphicon glyphicon-remove"></span> Finish</button>
                 <span *ngIf="activeGame.finishedBy && activeGame.finishedBy!=user.username">
                     {{activeGame.finishedBy}} wants to finish the game. Do you agree?
@@ -67,12 +67,12 @@
         <a href="#" class="dropdown-toggle" dropdownToggle>Finished Games <span class="badge">5</span></a>
         <ul class="dropdown-menu" dropdownMenu>
           <!--[ngfor]="let (key, games) of finishedGames | groupBy: 'gameName'"-->
-          <template ngFor let-game [ngForOf]="finishedGames | groupBy: 'gameDefinitionName'">
+          <template ngFor let-game [ngForOf]="finishedGames | groupBy: 'gameDefinition.name'">
             <li class="dropdown-header">{{game.key}}</li>
             <li *ngFor="let finishedGame of game.value">
               <a href="#">
-                <img src="{{finishedGame.userPic}}" class="img-circle" width="50" height="50"/>
-                {{finishedGame.userName}} <label class="label" [ngClass]="{'label-default': finishedGame.yourScore==finishedGame.opponentScore, 'label-success': finishedGame.yourScore>finishedGame.opponentScore, 'label-danger': finishedGame.yourScore<finishedGame.opponentScore}">{{finishedGame.yourScore}}:{{finishedGame.opponentScore}}</label> @ {{finishedGame.endDate | date:'yyyy-MM-dd HH:mm:ss Z'}}
+               <!-- <img src="{{finishedGame.userPic}}" class="img-circle" width="50" height="50"/>-->
+               <!-- {{finishedGame.userName}} <label class="label" [ngClass]="{'label-default': finishedGame.yourScore==finishedGame.opponentScore, 'label-success': finishedGame.yourScore>finishedGame.opponentScore, 'label-danger': finishedGame.yourScore<finishedGame.opponentScore}">{{finishedGame.yourScore}}:{{finishedGame.opponentScore}}</label> @ {{finishedGame.endDate | date:'yyyy-MM-dd HH:mm:ss Z'}}-->
               </a>
             </li>
             <li class="divider"></li>
@@ -112,11 +112,10 @@
           <td>{{top100PlayerRank+1}}</td>
           <td><img src="{{top100Player.userPic}}" class="img-circle" width="50" height="50"/> {{top100Player.userName}}</td>
         </tr>
-        <tr>
-          <td>&nbsp;</td>
-          <td><a href="#">Show more</a></td>
-        </tr>
       </table>
+      <div class="panel-footer">
+        Show more...
+      </div>
     </div>
   </div>
 </div>

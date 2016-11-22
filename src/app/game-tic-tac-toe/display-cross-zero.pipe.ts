@@ -7,11 +7,11 @@ export class DisplayCrossZeroPipe implements PipeTransform {
 
   transform(value: any, args?: any): any {
     switch (value){
-      case 0:
+      case null:
         return "";
-      case 1:
+      case 0:
         return "X";
-      case 2:
+      case 1:
         return "O";
     }
   }

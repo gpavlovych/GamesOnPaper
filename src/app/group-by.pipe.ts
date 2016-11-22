@@ -4,12 +4,20 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'groupBy'
 })
 export class GroupByPipe implements PipeTransform {
+  private getFieldValue(value: any, field: string){
+    var fields: string[] = field.split(".");
+    for (var fieldItem of fields){
+      value = value[fieldItem];
+    }
+    return value;
+  }
   transform(value: Array<any>, field: string): Array<any> {
     const groupedObj = value.reduce((prev, cur) => {
-      if (!prev[cur[field]]) {
-        prev[cur[field]] = [cur];
+      var fieldValue = this.getFieldValue(cur,field);
+      if (!prev[fieldValue]) {
+        prev[fieldValue] = [cur];
       } else {
-        prev[cur[field]].push(cur);
+        prev[fieldValue].push(cur);
       }
       return prev;
     }, {});
