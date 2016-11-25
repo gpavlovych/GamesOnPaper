@@ -54,22 +54,6 @@ export class AppComponent {
   activeGamesTotalCount = 11;
   finishedGames: GameInfo[] = [];
   finishedGamesTotalCount = 11;
-  top100Players: UserInfo[] = [
-    {
-      id: 112,
-      userPic: "",
-      userName: "kitty girl"
-    },
-    {
-      id: 32,
-      userPic: "",
-      userName: "lisa ann"
-    },
-    {
-      id: 455,
-      userPic: "",
-      userName: "red mistress"
-    }];
   title: string = 'app works!';
   user: UserInfo =
     {

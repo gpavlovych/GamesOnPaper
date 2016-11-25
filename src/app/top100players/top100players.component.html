@@ -1,0 +1,22 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">TOP-100</h3>
+  </div>
+  <div class="panel-body">
+    <p>Here is a list of top 100 most successful players:</p>
+  </div>
+  <!-- Table -->
+  <table class="table">
+    <tr>
+      <th>#</th>
+      <th>User</th>
+    </tr>
+    <tr *ngFor="let top100Player of top100Players; let top100PlayerRank=index">
+      <td>{{top100PlayerRank+1}}</td>
+      <td><img src="{{top100Player.userPic}}" class="img-circle" width="50" height="50"/> {{top100Player.userName}}</td>
+    </tr>
+  </table>
+  <div class="panel-footer">
+    <a href="#">Show more</a>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+<div class="col-sm-9 container">
 <table>
   <tr *ngFor="let row of game.data.rows; let rowIndex = index">
     <td *ngFor="let cell of row; let columnIndex = index" class="crosszerocell" [ngClass]="{'winningcell': game.data.result[rowIndex][columnIndex]}" (click)="checkCell(rowIndex, columnIndex)">
@@ -5,7 +6,10 @@
     </td>
   </tr>
 </table>
-
+</div>
+<div class="col-sm-3 container">
+  <app-top100players></app-top100players>
+</div>
 <!-- Modal -->
 
 <div bsModal #showWinnerModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">

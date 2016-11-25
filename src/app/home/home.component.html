@@ -12,7 +12,7 @@
       </table>
     </div>
     <div class="panel-footer">
-      Show more...
+      <a href="#">Show more</a>
     </div>
   </div>
   <div class="panel panel-default">
@@ -39,7 +39,7 @@
       </table>
     </div>
     <div class="panel-footer">
-      Show more...
+      <a href="#">Show more</a>
     </div>
   </div>
   <div class="panel panel-default">
@@ -67,7 +67,7 @@
       </table>
     </div>
     <div class="panel-footer">
-      Show more...
+      <a href="#">Show more</a>
     </div>
   </div>
   <div class="panel panel-default">
@@ -94,10 +94,10 @@
       </table>
     </div>
     <div class="panel-footer">
-      Show more
+      <a href="#">Show more</a>
     </div>
   </div>
-  <div class="panel panel-default">
+ л  <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">Finished Games</h3>
     </div>
@@ -112,7 +112,9 @@
             <tr>
               <td>
                 <template ngFor let-player [ngForOf]="finishedGame.players" let-i="index">
-                  <label class="label" [ngClass]="{'label-default': finishedGame.winner==null, 'label-success': finishedGame.winner==i, 'label-danger': finishedGame.winner!=null && finishedGame.winner!=i}">{{player.userName}}</label>
+                  <label class="label" [ngClass]="{'label-default': finishedGame.winner==null, 'label-success': finishedGame.winner==i, 'label-danger': finishedGame.winner!=null && finishedGame.winner!=i}">
+                    {{player.userName}}
+                  </label>
                 </template>
               </td>
             </tr>
@@ -121,7 +123,7 @@
       </table>
     </div>
     <div class="panel-footer">
-      Show more...
+      <a href="#">Show more</a>
     </div>
   </div>
 </div>
