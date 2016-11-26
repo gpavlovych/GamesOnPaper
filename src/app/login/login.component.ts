@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import {AuthenticationService} from "../authentication.service";
+import {AlertService} from "../alert.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -7,14 +10,30 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LoginComponent implements OnInit {
 
-  constructor() { }
+  constructor(private authenticationService: AuthenticationService,
+  private alertService: AlertService,
+  private router: Router) { }
 
   ngOnInit() {
+    // reset login status
+    this.authenticationService.logout();
   }
 
-  onSubmit(){
+  onSubmit() {
+    this.loading = true;
+    this.authenticationService
+      .login(this.login_username, this.login_password)
+      .subscribe(
+        data => {
+          this.router.navigate(['/']);
+        },
+        error => {
+          this.alertService.error(error);
+          this.loading = false;
+        });
   }
 
+  loading: boolean = false;
   login_username: string = "";
   login_password: string = "";
 }

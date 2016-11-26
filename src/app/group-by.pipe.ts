@@ -12,7 +12,7 @@ export class GroupByPipe implements PipeTransform {
     return value;
   }
   transform(value: Array<any>, field: string): Array<any> {
-    const groupedObj = value.reduce((prev, cur) => {
+    const groupedObj = value!=null ? value.reduce((prev, cur) => {
       var fieldValue = this.getFieldValue(cur,field);
       if (!prev[fieldValue]) {
         prev[fieldValue] = [cur];
@@ -20,7 +20,7 @@ export class GroupByPipe implements PipeTransform {
         prev[fieldValue].push(cur);
       }
       return prev;
-    }, {});
+    }, {}):[];
     return Object.keys(groupedObj).map(key => ({key, value: groupedObj[key]}));
   }
 }

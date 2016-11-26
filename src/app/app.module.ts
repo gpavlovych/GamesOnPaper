@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpModule, BaseRequestOptions } from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { MystubComponent } from './mystub/mystub.component';
@@ -17,14 +17,21 @@ import { ComponentsHelper } from 'ng2-bootstrap/ng2-bootstrap';
 import { GroupByPipe } from './group-by.pipe';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
-import { Top100playersComponent } from './top100players/top100players.component'
+import { Top100playersComponent } from './top100players/top100players.component';
+import { AlertComponent } from './alert/alert.component'
+import { AuthGuard } from "./auth.guard";
+import { MockBackend } from "@angular/http/testing";
+import { AuthenticationService } from "./authentication.service";
+import { AlertService } from "./alert.service";
+import { fakeBackendProvider } from "./fake-backend-provider";
+import { UserService } from "./user.service";
+import {GameService} from "./game.service";
 
 const appRoutes: Routes = [
-  {path:'tictactoe', component: GameTicTacToeComponent},
-  { path: 'mystub', component: MystubComponent },
+  { path: '', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'tictactoe', component: GameTicTacToeComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: '', component: HomeComponent },
   { path: '**', component: PageNotFoundComponent }
 ];
 
@@ -42,7 +49,8 @@ const appRoutes: Routes = [
     DropdownToggleDirective,
     LoginComponent,
     RegisterComponent,
-    Top100playersComponent
+    Top100playersComponent,
+    AlertComponent
   ],
   imports: [
     BrowserModule,
@@ -51,7 +59,21 @@ const appRoutes: Routes = [
     ModalModule,
     RouterModule.forRoot(appRoutes)
   ],
-  providers: [{provide: ComponentsHelper, useClass: ComponentsHelper}],
+  providers: [
+    {
+      provide: ComponentsHelper,
+      useClass: ComponentsHelper
+    },
+    AuthGuard,
+    AlertService,
+    AuthenticationService,
+    GameService,
+    UserService,
+
+    // providers used to create fake backend
+    fakeBackendProvider,
+    MockBackend,
+    BaseRequestOptions],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
