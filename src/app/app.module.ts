@@ -5,15 +5,11 @@ import { HttpModule, BaseRequestOptions } from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { MystubComponent } from './mystub/mystub.component';
-import { ModalModule } from 'ng2-bootstrap/ng2-bootstrap'
+import { ModalModule, PaginationModule, DropdownDirective, DropdownMenuDirective, DropdownToggleDirective, ComponentsHelper } from 'ng2-bootstrap/ng2-bootstrap';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
 import { GameTicTacToeComponent } from './game-tic-tac-toe/game-tic-tac-toe.component';
 import { DisplayCrossZeroPipe } from './game-tic-tac-toe/display-cross-zero.pipe';
-import { DropdownDirective } from 'ng2-bootstrap/ng2-bootstrap';
-import { DropdownMenuDirective } from 'ng2-bootstrap/ng2-bootstrap';
-import { DropdownToggleDirective } from 'ng2-bootstrap/ng2-bootstrap';
-import { ComponentsHelper } from 'ng2-bootstrap/ng2-bootstrap';
 import { GroupByPipe } from './group-by.pipe';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
@@ -25,7 +21,8 @@ import { AuthenticationService } from "./authentication.service";
 import { AlertService } from "./alert.service";
 import { fakeBackendProvider } from "./fake-backend-provider";
 import { UserService } from "./user.service";
-import {GameService} from "./game.service";
+import { GameService } from "./game.service";
+import { CreateGameComponent } from './create-game/create-game.component';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -50,13 +47,15 @@ const appRoutes: Routes = [
     LoginComponent,
     RegisterComponent,
     Top100playersComponent,
-    AlertComponent
+    AlertComponent,
+    CreateGameComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
     ModalModule,
+    PaginationModule,
     RouterModule.forRoot(appRoutes)
   ],
   providers: [
