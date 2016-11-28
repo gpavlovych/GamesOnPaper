@@ -1,8 +1,9 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
-import { GameDefinitionInfo } from "./game-definition";
+import {GameDefinitionInfo, GameDefinitionDetails} from "./game-definition";
 import { GameInfo } from "./game";
 import {GameState} from "./game-state.enum";
+import {UserInfo} from "./user";
 
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
@@ -10,7 +11,15 @@ export let fakeBackendProvider = {
   useFactory: (backend: MockBackend, options: BaseRequestOptions) => {
     // array in local storage for registered users
     let users: any[] = JSON.parse(localStorage.getItem('users')) || [];
-
+    let fakeUsersCount: number = 10;
+    let fakeUsers: UserInfo[]=[];
+    for (let i = 0; i < fakeUsersCount; i++) {
+      fakeUsers.push({
+        id: i + 1,
+        userName: "someUser " + i,
+        userPic: ""
+      });
+    }
     let gameDefinitionsCount = 2;
     let gameDefinitions: GameDefinitionInfo[] = [
       {
@@ -282,10 +291,43 @@ export let fakeBackendProvider = {
         }
 
         // get users
-        if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {
+        let usersMatch = connection.request.url.match(/\/api\/users\?skip=(\d+)&take=(\d+)$/);
+        if (usersMatch && usersMatch.length === 3 && connection.request.method === RequestMethod.Get) {
+          let skip = parseInt(usersMatch[1]);
+          let take = parseInt(usersMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
           if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: users })));
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: fakeUsers.slice(skip, take+skip)})));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+          }
+        }
+
+        // get users count
+        let usersCountMatch = connection.request.url.match(/\/api\/users\/count$/);
+        if (usersCountMatch && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: fakeUsers.length})));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+          }
+        }
+
+        // get game definition by id
+        if (connection.request.url.match(/\/api\/gamedefinitions\/\d+$/) && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            // find user by id in users array
+            let urlParts = connection.request.url.split('/');
+            let id = parseInt(urlParts[urlParts.length - 1]);
+
+            let gameDefinition: GameDefinitionDetails = {id: id, icon:"", name:"tic tac toe"};
+
+            // respond 200 OK with user
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinition })));
           } else {
             // return 401 not authorised if token is null or invalid
             connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));

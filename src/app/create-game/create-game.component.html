@@ -1,0 +1,31 @@
+<div class="row">
+  <template [ngIf]="gameDefinition==null">
+    Please wait
+  </template>
+  <template [ngIf]="gameDefinition!=null">
+    <h1>Invite user to play {{gameDefinition.name}} with you!</h1>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Create Game</h3>
+      </div>
+      <div class="panel-body">
+        <h4>Users</h4>
+        <table class="table">
+          <tr *ngFor="let user of users">
+            <td><img src="{{user.userPic}}" class="img-circle" width="50" height="50"/>{{user.userName}}</td>
+            <td><button (click)="inviteUser(user)">Invite</button></td>
+          </tr>
+        </table>
+      </div>
+      <div class="panel-footer">
+        <pagination
+          *ngIf="usersTotalCount > usersTop"
+          [itemsPerPage]="usersTop"
+          [totalItems]="usersTotalCount"
+          [rotate]="true"
+          [maxSize]="10"
+          [(ngModel)]="usersCurrentPage"></pagination>
+      </div>
+    </div>
+  </template>
+</div>

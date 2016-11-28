@@ -16,6 +16,7 @@
         *ngIf="gamesToBeCreatedTotalCount > gamesToBeCreatedTop"
         [itemsPerPage]="gamesToBeCreatedTop"
         [totalItems]="gamesToBeCreatedTotalCount"
+        [rotate]="true"
         [maxSize]="10"
         [(ngModel)]="gamesToBeCreatedCurrentPage"></pagination>
     </div>
@@ -48,6 +49,7 @@
         *ngIf="incomingInvitationsTotalCount > incomingInvitationsTop"
         [itemsPerPage]="incomingInvitationsTop"
         [totalItems]="incomingInvitationsTotalCount"
+        [rotate]="true"
         [maxSize]="10"
         [(ngModel)]="incomingInvitationsCurrentPage"></pagination>
     </div>
@@ -81,6 +83,7 @@
         *ngIf="incomingInvitationsTotalCount > incomingInvitationsTop"
         [itemsPerPage]="incomingInvitationsTop"
         [maxSize]="10"
+        [rotate]="true"
         [totalItems]="outgoingInvitationsTotalCount"
         [(ngModel)]="outgoingInvitationsCurrentPage"></pagination>
     </div>
@@ -113,6 +116,7 @@
         *ngIf="activeGamesTotalCount > activeGamesTop"
         [itemsPerPage]="activeGamesTop"
         [maxSize]="10"
+        [rotate]="true"
         [totalItems]="activeGamesTotalCount"
         [(ngModel)]="activeGamesCurrentPage"></pagination>
     </div>
@@ -147,6 +151,7 @@
         *ngIf="finishedGamesTotalCount > finishedGamesTop"
         [itemsPerPage]="finishedGamesTop"
         [maxSize]="10"
+        [rotate]="true"
         [totalItems]="finishedGamesTotalCount"
         [(ngModel)]="finishedGamesCurrentPage"></pagination>
     </div>

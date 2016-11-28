@@ -26,6 +26,7 @@ import { CreateGameComponent } from './create-game/create-game.component';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'creategame/:id', component: CreateGameComponent, canActivate: [AuthGuard] },
   { path: 'tictactoe', component: GameTicTacToeComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
