@@ -23,6 +23,8 @@ import { fakeBackendProvider } from "./fake-backend-provider";
 import { UserService } from "./user.service";
 import { GameService } from "./game.service";
 import { CreateGameComponent } from './create-game/create-game.component';
+import { ConfirmationComponent } from './confirmation/confirmation.component';
+import {ConfirmationService} from "./confirmation.service";
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -49,7 +51,8 @@ const appRoutes: Routes = [
     RegisterComponent,
     Top100playersComponent,
     AlertComponent,
-    CreateGameComponent
+    CreateGameComponent,
+    ConfirmationComponent
   ],
   imports: [
     BrowserModule,
@@ -66,6 +69,7 @@ const appRoutes: Routes = [
     },
     AuthGuard,
     AlertService,
+    ConfirmationService,
     AuthenticationService,
     GameService,
     UserService,

@@ -7,6 +7,7 @@ import {UserService} from "../user.service";
 import {AlertService} from "../alert.service";
 import {GameTicTacToeData} from "../game-tic-tac-toe/game-tic-tac-toe-data";
 import {GameDetails} from "../game";
+import {ConfirmationService} from "../confirmation.service";
 
 @Component({
   selector: 'app-create-game',
@@ -16,7 +17,7 @@ import {GameDetails} from "../game";
 export class CreateGameComponent implements OnInit {
 
   private sub: any;
-  constructor(private gameService: GameService, private userService: UserService, private alertService: AlertService, private route: ActivatedRoute) {
+  constructor(private gameService: GameService, private userService: UserService, private alertService: AlertService, private route: ActivatedRoute, private confirmationService: ConfirmationService) {
     this.gameDefinition = null;
     this.users = [];
     this._usersCurrentPage = 1;
@@ -81,17 +82,20 @@ export class CreateGameComponent implements OnInit {
       }
     );
   }
-  inviteUser(user: UserInfo){
-    this.gameService.create(<GameDetails<GameTicTacToeData>>{
-      id: 1,
-      activePlayer: 0,
-      players: [
-        this.currentUser,
-        user
-      ]}).subscribe(()=>
-    {
-
-      this.alertService.error("You've just invited user "+user.userName); //TODO: message
+  inviteUser(user: UserInfo) {
+    this.confirmationService.confirm("Do you really want to play with user " + user.userName + "?", "Invite user").then(result => {
+      if (result) {
+        this.gameService.create(<GameDetails<GameTicTacToeData>>{
+          id: 1,
+          activePlayer: 0,
+          players: [
+            this.currentUser,
+            user
+          ]
+        }).subscribe(() => {
+          this.alertService.success("You've just invited user " + user.userName); //TODO: message
+        });
+      }
     });
   }
 gameDefinition: GameDefinitionDetails;

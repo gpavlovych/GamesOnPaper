@@ -353,6 +353,29 @@ export let fakeBackendProvider = {
         }
 
         // create user
+        if (connection.request.url.endsWith('/api/games') && connection.request.method === RequestMethod.Post) {
+          // get new user object from post body
+
+          /*
+          // let newUser = JSON.parse(connection.request.getBody());
+
+          // validation
+          let duplicateUser = users.filter(user => { return user.username === newUser.username; }).length;
+          if (duplicateUser) {
+            return connection.mockError(new Error('Username "' + newUser.username + '" is already taken'));
+          }
+
+          // save new user
+          newUser.id = users.length + 1;
+          users.push(newUser);
+          localStorage.setItem('games', JSON.stringify(users));
+          */
+
+          // respond 200 OK
+          connection.mockRespond(new Response(new ResponseOptions({ status: 200 })));
+        }
+
+        // create user
         if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Post) {
           // get new user object from post body
           let newUser = JSON.parse(connection.request.getBody());
