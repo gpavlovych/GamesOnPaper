@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { RequestOptions, Headers, Response, Http } from "@angular/http";
 import { UserDetails } from "./user";
 import { AuthenticationService } from "./authentication.service";
+import {CreateUserViewModel} from "./view-models/create-user-view-model";
 
 @Injectable()
 export class UserService {
@@ -22,7 +23,7 @@ export class UserService {
     return this.http.get('/api/users/' + id, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  create(user: UserDetails) {
+  create(user: CreateUserViewModel) {
     return this.http.post('/api/users', user, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 

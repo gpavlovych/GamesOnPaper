@@ -3,7 +3,10 @@ import { MockBackend, MockConnection } from '@angular/http/testing';
 import {GameDefinitionInfo, GameDefinitionDetails} from "./game-definition";
 import { GameInfo } from "./game";
 import {GameState} from "./game-state.enum";
-import {UserInfo} from "./user";
+import {UserInfo, UserDetails} from "./user";
+import {CreateGameViewModel} from "./view-models/create-game-view-model";
+import {GameViewModel} from "./view-models/game-view-model";
+import {CreateUserViewModel} from "./view-models/create-user-view-model";
 
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
@@ -11,6 +14,7 @@ export let fakeBackendProvider = {
   useFactory: (backend: MockBackend, options: BaseRequestOptions) => {
     // array in local storage for registered users
     let users: any[] = JSON.parse(localStorage.getItem('users')) || [];
+    let games: any[] = JSON.parse(localStorage.getItem('games')) || [];
     let fakeUsersCount: number = 10;
     let fakeUsers: UserInfo[]=[];
     for (let i = 0; i < fakeUsersCount; i++) {
@@ -352,33 +356,38 @@ export let fakeBackendProvider = {
           }
         }
 
-        // create user
+        // create game
         if (connection.request.url.endsWith('/api/games') && connection.request.method === RequestMethod.Post) {
-          // get new user object from post body
+          // get new game object from post body
+          let newGameCreateVm: CreateGameViewModel = JSON.parse(connection.request.getBody());
+          let newGame: GameViewModel = {
+            id: games.length+1,
+            data: {},
+            playerIds: newGameCreateVm.playerIds,
+            gameDefinitionId: newGameCreateVm.gameDefinitionId,
+            state: GameState.new
+          };
 
-          /*
-          // let newUser = JSON.parse(connection.request.getBody());
-
-          // validation
-          let duplicateUser = users.filter(user => { return user.username === newUser.username; }).length;
-          if (duplicateUser) {
-            return connection.mockError(new Error('Username "' + newUser.username + '" is already taken'));
-          }
-
-          // save new user
-          newUser.id = users.length + 1;
-          users.push(newUser);
-          localStorage.setItem('games', JSON.stringify(users));
-          */
+          // save new game
+          games.push(newGame);
+          localStorage.setItem('games', JSON.stringify(games));
 
           // respond 200 OK
-          connection.mockRespond(new Response(new ResponseOptions({ status: 200 })));
+          connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: newGame.id })));
         }
 
         // create user
         if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Post) {
           // get new user object from post body
-          let newUser = JSON.parse(connection.request.getBody());
+          let createUserViewModel: CreateUserViewModel = JSON.parse(connection.request.getBody());
+          let newUser: UserDetails = {
+            id: users.length + 1,
+            firstName: createUserViewModel.firstName,
+            lastName: createUserViewModel.lastName,
+            password: createUserViewModel.password,
+            username: createUserViewModel.username,
+            userPic: createUserViewModel.userPic
+          };
 
           // validation
           let duplicateUser = users.filter(user => { return user.username === newUser.username; }).length;

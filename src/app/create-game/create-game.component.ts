@@ -8,6 +8,8 @@ import {AlertService} from "../alert.service";
 import {GameTicTacToeData} from "../game-tic-tac-toe/game-tic-tac-toe-data";
 import {GameDetails} from "../game";
 import {ConfirmationService} from "../confirmation.service";
+import {CreateGameViewModel} from "../view-models/create-game-view-model";
+import {AuthenticationService} from "../authentication.service";
 
 @Component({
   selector: 'app-create-game',
@@ -17,7 +19,7 @@ import {ConfirmationService} from "../confirmation.service";
 export class CreateGameComponent implements OnInit {
 
   private sub: any;
-  constructor(private gameService: GameService, private userService: UserService, private alertService: AlertService, private route: ActivatedRoute, private confirmationService: ConfirmationService) {
+  constructor(private gameService: GameService, private userService: UserService, private alertService: AlertService, private route: ActivatedRoute, private confirmationService: ConfirmationService, private authenticationService: AuthenticationService) {
     this.gameDefinition = null;
     this.users = [];
     this._usersCurrentPage = 1;
@@ -62,7 +64,6 @@ export class CreateGameComponent implements OnInit {
     this.refreshGameToBeCreatedTotalCount();
   }
 
-  currentUser: UserInfo;
   users: UserInfo[];
   usersTop: number = 5;
   usersTotalCount: number;
@@ -83,17 +84,17 @@ export class CreateGameComponent implements OnInit {
     );
   }
   inviteUser(user: UserInfo) {
-    this.confirmationService.confirm("Do you really want to play with user " + user.userName + "?", "Invite user").then(result => {
+    let currentUserId = this.authenticationService.getAuthorizedUserId();
+    this.confirmationService.confirm("Do you "+currentUserId+" really want to play with user " + user.id + "?", "Invite user").then(result => {
       if (result) {
-        this.gameService.create(<GameDetails<GameTicTacToeData>>{
-          id: 1,
-          activePlayer: 0,
-          players: [
-            this.currentUser,
-            user
-          ]
-        }).subscribe(() => {
-          this.alertService.success("You've just invited user " + user.userName); //TODO: message
+        this.gameService.create(<CreateGameViewModel>{
+          playerIds: [
+            currentUserId,
+            user.id
+          ],
+          gameDefinitionId: this.gameDefinition.id
+        }).subscribe(gameId => {
+          this.alertService.success("You've just invited user " + user.userName+"; game with id "+gameId+" is created "); //TODO: message
         });
       }
     });

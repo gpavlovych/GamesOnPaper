@@ -4,6 +4,7 @@ import { AuthenticationService } from "./authentication.service";
 import {GameDefinitionInfo} from "./game-definition";
 import {GameDetails, FinishRequestInfo, FinishApprovalState} from "./game";
 import {GameState} from "./game-state.enum";
+import {CreateGameViewModel} from "./view-models/create-game-view-model";
 
 @Injectable()
 export class GameService {
@@ -62,7 +63,7 @@ export class GameService {
     return this.http.get('/api/games/' + id, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  create<T>(game: GameDetails<T>) {
+  create(game: CreateGameViewModel) {
     return this.http.post('/api/games', game, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
