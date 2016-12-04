@@ -73,6 +73,16 @@ export class GameService {
     return this.http.get('/api/games/' + id, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
+  accept(id: any)
+  {
+    return this.http.post('/api/games/'+id+'/accept', this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
+  }
+
+  decline(id: any)
+  {
+    return this.http.post('/api/games/'+id+'/decline', this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
+  }
+
   create(game: CreateGameViewModel)
   {
     return this.http.post('/api/games', game, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());

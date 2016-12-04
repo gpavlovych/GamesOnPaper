@@ -13,11 +13,10 @@ import {RefreshService} from "../refresh.service";
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  constructor(
-    private authenticationService: AuthenticationService,
-    private gameService: GameService,
-    private userService: UserService,
-    private refreshService: RefreshService) {
+  constructor(private authenticationService: AuthenticationService,
+              private gameService: GameService,
+              private userService: UserService,
+              private refreshService: RefreshService) {
     this.inited = false;
 
     this.finishedGames = [];
@@ -50,11 +49,12 @@ export class HomeComponent implements OnInit {
   }
 
   inited: boolean;
+
   refresh() {
     this.user = null;
     let userId = this.authenticationService.getAuthorizedUserId();
 
-    if (userId == null){
+    if (userId == null) {
       return;
     }
 
@@ -103,7 +103,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  private refreshFinishedGamesTotalCount(){
+  private refreshFinishedGamesTotalCount() {
     this.gameService.getFinishedCount().subscribe(
       data => {
         this.finishedGamesTotalCount = data;
@@ -134,7 +134,8 @@ export class HomeComponent implements OnInit {
       }
     );
   }
-  private refreshActiveGamesTotalCount(){
+
+  private refreshActiveGamesTotalCount() {
     this.gameService.getActiveCount().subscribe(
       data => {
         this.activeGamesTotalCount = data;
@@ -176,10 +177,11 @@ export class HomeComponent implements OnInit {
 
   private _incomingInvitationsCurrentPage: number;
 
-  get incomingInvitationsCurrentPage(){
+  get incomingInvitationsCurrentPage() {
     return this._incomingInvitationsCurrentPage;
   }
-  set incomingInvitationsCurrentPage(value: number){
+
+  set incomingInvitationsCurrentPage(value: number) {
     this._incomingInvitationsCurrentPage = value;
     this.refreshIncomingInvitations();
     this.refreshIncomingInvitationsTotalCount();
@@ -235,6 +237,18 @@ export class HomeComponent implements OnInit {
         this.gamesToBeCreatedTotalCount = data;
       }
     );
+  }
+
+  accept(gameId: any) {
+    this.gameService.accept(gameId).subscribe(() => {
+      this.refreshService.refresh();
+    });
+  }
+
+  decline(gameId: any) {
+    this.gameService.decline(gameId).subscribe(() => {
+      this.refreshService.refresh();
+    });
   }
 
   user: UserDetails;//TODO: best approach to user login

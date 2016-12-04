@@ -97,7 +97,7 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a class="navbar-brand"><strong><span><img class="img-circle" width="24" height="24" src="{{user.userPic}}"/></span> {{user.userName}}</strong></a></li>
+        <li><a class="navbar-brand"><strong><span><app-user-avatar [user]="getUserInfo(user)"></app-user-avatar></span> {{user.userName}}</strong></a></li>
         <li><a [routerLink]="['/login']" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span> Logout</strong></a></li>
       </ul>
     </template>

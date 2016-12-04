@@ -1,6 +1,6 @@
 import { Component, ViewContainerRef, OnInit } from '@angular/core';
 import { ComponentsHelper } from 'ng2-bootstrap/ng2-bootstrap';
-import { UserDetails } from './user';
+import {UserDetails, UserInfo} from './user';
 import { GameDefinitionInfo } from './game-definition';
 import { GameInfo } from './game'
 import { GameState } from "./game-state.enum";
@@ -55,6 +55,7 @@ export class AppComponent implements OnInit {
     this.gameService.getIncoming(0, this.incomingInvitationsTop).subscribe(
       data => {
         this.incomingInvitations = data;
+        console.log('incoming '+JSON.stringify(data));
       }
     );
 
@@ -99,6 +100,15 @@ export class AppComponent implements OnInit {
         this.finishedGamesTotalCount = data;
       }
     );
+  }
+
+  getUserInfo(user: UserDetails): UserInfo {
+    return {
+      id: user.id,
+      sex: user.sex,
+      userName: user.username,
+      userPic: user.userPic
+    };
   }
 
   gamesToBeCreated: GameDefinitionInfo[];

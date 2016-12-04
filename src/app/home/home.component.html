@@ -37,8 +37,8 @@
           </tr>
           <tr>
             <td>
-              <button type="button" class="btn btn-default">Accept</button>
-              <button type="button" class="btn btn-default">Decline</button>
+              <button type="button" class="btn btn-default" (click)="accept(incomingInvitation.id)">Accept</button>
+              <button type="button" class="btn btn-default" (click)="decline(incomingInvitation.id)">Decline</button>
             </td>
           </tr>
         </template>
@@ -71,7 +71,7 @@
             </tr>
             <tr *ngIf="i!=outgoingInvitation.activePlayer">
               <td>
-                <button type="button" class="btn btn-default">Decline</button>
+                <button type="button" class="btn btn-default" (click)="decline(outgoingInvitation.id)">Decline</button>
               </td>
             </tr>
           </template>

@@ -102,6 +102,7 @@ export class CreateGameComponent implements OnInit {
           gameDefinitionId: this.gameDefinition.id
         }).subscribe(gameId => {
           this.alertService.success("You've just invited user " + user.userName+"; game with id "+gameId+" is created "); //TODO: message
+          this.refreshService.refresh();
         });
       }
     });

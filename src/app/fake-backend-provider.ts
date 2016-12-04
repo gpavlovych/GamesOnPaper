@@ -13,85 +13,88 @@ export let fakeBackendProvider = {
   provide: Http,
   useFactory: (backend: MockBackend, options: BaseRequestOptions) => {
     // array in local storage for registered users
-    let users: any[] = JSON.parse(localStorage.getItem('users')) || [];
-    let games: any[] = JSON.parse(localStorage.getItem('games')) || [];
-    function getUserFromToken(token: string) {
-      if (token) {
-//        console.log(token);
-        let tokenMatch = token.match(/^Bearer fake_user_token:(.*)$/);
-        if (tokenMatch && tokenMatch.length > 1) {
-          let userName = tokenMatch[1];
-          for (let user of users) {
-            if (user.username == userName) {
-              return user;
-            }
-          }
-        }
-      }
-      return null;
-    }
-
-    function toIdDictionary(arr: any[]){
-      var result = {};
-      for (let arrItem of arr) {
-        result[arrItem.id] = arrItem;
-      }
-      return result;
-    }
-
-    let gameDefinitionInfos: GameDefinitionInfo[] = [
-      {
-        id: 1,
-        name: 'tic-tac-toe',
-        icon: ''
-      },
-      {
-        id: 2,
-        name: 'dots',
-        icon: ''
-      }
-    ];
-
-    let userInfos: UserInfo[]=[];
-    for (let user of users){
-      let userInfo: UserInfo = {
-        id: user.id,
-        sex: user.sex || 0,
-        userName: user.username,
-        userPic: ""
-      };
-      userInfos.push(userInfo);
-    }
-
-    let userInfosDictionary = toIdDictionary(userInfos);
-    let gameDefinitionInfosDictionary = toIdDictionary(gameDefinitionInfos);
-
-    let gameInfos: GameInfo[]= [];
-    for (let game of games) {
-      let gameDefinitionInfo: GameDefinitionInfo = gameDefinitionInfosDictionary[game.gameDefinitionId];
-
-      let players: UserInfo[] = [];
-      for (let playerId of game.playerIds) {
-        players.push(userInfosDictionary[playerId]);
-      }
-
-      let gameInfo: GameInfo = {
-        gameDefinition: gameDefinitionInfo,
-        players: players,
-        activePlayer: 0,
-        state: game.state,
-        id: game.id,
-        winner: game.winner
-      };
-
-      gameInfos.push(gameInfo);
-    }
+    //localStorage.removeItem('users');
+    //localStorage.removeItem('games');
 
     // configure fake backend
     backend.connections.subscribe((connection: MockConnection) => {
 //      console.log('connection!');
       // wrap in timeout to simulate server api call
       setTimeout(() => {
+        let users: UserDetails[] = JSON.parse(localStorage.getItem('users')) || [];
+        let games: any[] = JSON.parse(localStorage.getItem('games')) || [];
+        function getUserFromToken(token: string) {
+          if (token) {
+//        console.log(token);
+            let tokenMatch = token.match(/^Bearer fake_user_token:(.*)$/);
+            if (tokenMatch && tokenMatch.length > 1) {
+              let userName = tokenMatch[1];
+              for (let user of users) {
+                if (user.username == userName) {
+                  return user;
+                }
+              }
+            }
+          }
+          return null;
+        }
+
+        function toIdDictionary(arr: any[]){
+          var result = {};
+          for (let arrItem of arr) {
+            result[arrItem.id] = arrItem;
+          }
+          return result;
+        }
+
+        let gameDefinitionInfos: GameDefinitionInfo[] = [
+          {
+            id: 1,
+            name: 'tic-tac-toe',
+            icon: ''
+          },
+          {
+            id: 2,
+            name: 'dots',
+            icon: ''
+          }
+        ];
+
+        let userInfos: UserInfo[]=[];
+        for (let user of users){
+          let userInfo: UserInfo = {
+            id: user.id,
+            sex: user.sex || 0,
+            userName: user.username,
+            userPic: ""
+          };
+          userInfos.push(userInfo);
+        }
+
+        let userInfosDictionary = toIdDictionary(userInfos);
+        let gameDefinitionInfosDictionary = toIdDictionary(gameDefinitionInfos);
+
+        let gameInfos: GameInfo[]= [];
+        for (let game of games) {
+          let gameDefinitionInfo: GameDefinitionInfo = gameDefinitionInfosDictionary[game.gameDefinitionId];
+
+          let players: UserInfo[] = [];
+          for (let playerId of game.playerIds) {
+            players.push(userInfosDictionary[playerId]);
+          }
+
+          let gameInfo: GameInfo = {
+            gameDefinition: gameDefinitionInfo,
+            players: players,
+            activePlayer: 0,
+            state: game.state,
+            id: game.id,
+            winner: game.winner
+          };
+
+          gameInfos.push(gameInfo);
+        }
+
         let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
 
         // authenticate
@@ -155,7 +158,7 @@ export let fakeBackendProvider = {
         if (authenticatedUser) {
           for (let gameInfo of gameInfos) {
             for (let playerIdIndex = 0; playerIdIndex < gameInfo.players.length; playerIdIndex++) {
-              if (gameInfo.players[playerIdIndex].id == authenticatedUser.id) {
+              if (gameInfo.players[playerIdIndex] && gameInfo.players[playerIdIndex].id == authenticatedUser.id) {
                 if (gameInfo.state == GameState.new) {
                   if (playerIdIndex > 0) {
                     incoming.push(gameInfo);
@@ -396,8 +399,21 @@ export let fakeBackendProvider = {
           // respond 200 OK
           connection.mockRespond(new Response(new ResponseOptions({ status: 200 })));
         }
-
-        // delete user
+        let gameAcceptMatch = connection.request.url.match(/\/api\/games\/(\d+)\/accept$/);
+        if (gameAcceptMatch && gameAcceptMatch.length > 1 && connection.request.method === RequestMethod.Post) {
+          let id = parseInt(gameAcceptMatch[1]);
+          for (let game of games){
+            if (game.id == id) {
+              game.state = GameState.active;
+              localStorage.setItem('games', JSON.stringify(games));
+              // respond 200 OK
+              connection.mockRespond(new Response(new ResponseOptions({status: 200})));
+              return;
+            }
+          }
+          connection.mockRespond(new Response(new ResponseOptions({status: 401})))
+        }
+          // delete user
         if (connection.request.url.match(/\/api\/users\/\d+$/) && connection.request.method === RequestMethod.Delete) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
           let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
