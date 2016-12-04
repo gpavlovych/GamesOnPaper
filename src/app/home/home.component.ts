@@ -5,6 +5,7 @@ import { UserDetails } from "../user";
 import { AuthenticationService } from "../authentication.service";
 import { GameService } from "../game.service";
 import { UserService } from "../user.service";
+import {RefreshService} from "../refresh.service";
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private authenticationService: AuthenticationService,
     private gameService: GameService,
-    private userService: UserService) {
+    private userService: UserService,
+    private refreshService: RefreshService) {
     this.inited = false;
 
     this.finishedGames = [];
@@ -40,13 +42,13 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (!this.inited)
-    {
+    if (!this.inited) {
       this.refresh();
+      this.refreshService.getRefresher().subscribe(() => this.refresh());
       this.inited = true;
     }
-
   }
+
   inited: boolean;
   refresh() {
     this.user = null;

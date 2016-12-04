@@ -7,6 +7,7 @@ import { GameState } from "./game-state.enum";
 import { GameService } from "./game.service";
 import { AuthenticationService } from "./authentication.service";
 import {UserService} from "./user.service";
+import {RefreshService} from "./refresh.service";
 
 @Component({
   selector: 'app-root',
@@ -19,45 +20,37 @@ export class AppComponent implements OnInit {
     vcr: ViewContainerRef,
     private gameService: GameService,
     private authenticationService: AuthenticationService,
-    private userService: UserService)
+    private userService: UserService,
+    private refreshService: RefreshService)
   {
     componentsHelper.setRootViewContainerRef(vcr);
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.refresh();
+    this.refreshService.getRefresher().subscribe(() => this.refresh());
   }
 
   refresh() {
-    this.user = null;
     this.gamesToBeCreated = [];
     this.gamesToBeCreatedTotalCount = 0;
     this.incomingInvitations = [];
     this.incomingInvitationsTotalCount = 0;
     this.outgoingInvitations = [];
     this.outgoingInvitationsTotalCount = 0;
-    let userId = this.authenticationService.getAuthorizedUserId();
+    this.user = null;
 
-    if (userId == null){
-      return;
+    let userId = this.authenticationService.getAuthorizedUserId();
+    if (userId) {
+      this.userService.getById(userId).subscribe(data => {
+        this.user = data;
+        console.log("data");
+      });
     }
 
-    this.userService.getById(userId).subscribe(
-      user => {
-        this.user = user;
-      });
+    this.gameService.getGameDefinitions(0, this.gamesToBeCreatedTop).subscribe(data => this.gamesToBeCreated = data);
 
-    this.gameService.getGameDefinitions(0, this.gamesToBeCreatedTop).subscribe(
-      data => {
-        this.gamesToBeCreated = data;
-      }
-    );
-
-    this.gameService.getGameDefinitionsCount().subscribe(
-      data => {
-        this.gamesToBeCreatedTotalCount = data;
-      }
-    );
+    this.gameService.getGameDefinitionsCount().subscribe(data => this.gamesToBeCreatedTotalCount = data);
 
     this.gameService.getIncoming(0, this.incomingInvitationsTop).subscribe(
       data => {
@@ -128,5 +121,5 @@ export class AppComponent implements OnInit {
   finishedGamesTop: number = 10;
   finishedGamesTotalCount: number;
 
-  user: UserDetails;//TODO: best approach to user login
+  user: UserDetails;
 }

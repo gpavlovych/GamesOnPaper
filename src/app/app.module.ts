@@ -26,6 +26,8 @@ import { CreateGameComponent } from './create-game/create-game.component';
 import { ConfirmationComponent } from './confirmation/confirmation.component';
 import {ConfirmationService} from "./confirmation.service";
 import { KeysPipe } from './keys.pipe';
+import { UserAvatarComponent } from './user-avatar/user-avatar.component';
+import {RefreshService} from "./refresh.service";
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -54,7 +56,8 @@ const appRoutes: Routes = [
     AlertComponent,
     CreateGameComponent,
     ConfirmationComponent,
-    KeysPipe
+    KeysPipe,
+    UserAvatarComponent
   ],
   imports: [
     BrowserModule,
@@ -75,6 +78,7 @@ const appRoutes: Routes = [
     AuthenticationService,
     GameService,
     UserService,
+    RefreshService,
 
     // providers used to create fake backend
     fakeBackendProvider,

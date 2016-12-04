@@ -31,7 +31,7 @@
         <template ngFor let-incomingInvitation [ngForOf]="incomingInvitations">
           <tr>
             <td>
-              <img src="{{incomingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
+              <app-user-avatar [user]="incomingInvitation.players[0]"></app-user-avatar>
               {{incomingInvitation.players[0].userName}} invited you to play {{incomingInvitation.gameDefinition.name}}!
             </td>
           </tr>
@@ -65,7 +65,7 @@
           <template ngFor let-outgoingInvitationUser [ngForOf]="outgoingInvitation.players" let-i="index">
             <tr *ngIf="i!=outgoingInvitation.activePlayer">
               <td>
-                <img src="{{outgoingInvitationUser.userPic}}" class="img-circle" width="50" height="50"/>
+                <app-user-avatar [user]="outgoingInvitation.players[0]"></app-user-avatar>
                 {{outgoingInvitationUser.userName}} invited to play {{outgoingInvitation.gameDefinition.Name}} with you!
               </td>
             </tr>
@@ -80,8 +80,8 @@
     </div>
     <div class="panel-footer">
       <pagination
-        *ngIf="incomingInvitationsTotalCount > incomingInvitationsTop"
-        [itemsPerPage]="incomingInvitationsTop"
+        *ngIf="outgoingInvitationsTotalCount > outgoingInvitationsTop"
+        [itemsPerPage]="outgoingInvitationsTop"
         [maxSize]="10"
         [rotate]="true"
         [totalItems]="outgoingInvitationsTotalCount"

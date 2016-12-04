@@ -17,7 +17,7 @@ export let fakeBackendProvider = {
     let games: any[] = JSON.parse(localStorage.getItem('games')) || [];
     function getUserFromToken(token: string) {
       if (token) {
-        console.log(token);
+//        console.log(token);
         let tokenMatch = token.match(/^Bearer fake_user_token:(.*)$/);
         if (tokenMatch && tokenMatch.length > 1) {
           let userName = tokenMatch[1];
@@ -89,7 +89,7 @@ export let fakeBackendProvider = {
 
     // configure fake backend
     backend.connections.subscribe((connection: MockConnection) => {
-      console.log('connection!');
+//      console.log('connection!');
       // wrap in timeout to simulate server api call
       setTimeout(() => {
         let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
@@ -421,8 +421,8 @@ export let fakeBackendProvider = {
             connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
           }
         }
-        console.log('connection request'+JSON.stringify(connection.request));
-        console.log('connection response'+connection.response);
+//        console.log('connection request'+JSON.stringify(connection.request));
+//        console.log('connection response'+connection.response);
 
       }, 500);
 

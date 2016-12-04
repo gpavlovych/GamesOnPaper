@@ -10,6 +10,7 @@ import {GameDetails} from "../game";
 import {ConfirmationService} from "../confirmation.service";
 import {CreateGameViewModel} from "../view-models/create-game-view-model";
 import {AuthenticationService} from "../authentication.service";
+import {RefreshService} from "../refresh.service";
 
 @Component({
   selector: 'app-create-game',
@@ -19,7 +20,14 @@ import {AuthenticationService} from "../authentication.service";
 export class CreateGameComponent implements OnInit {
 
   private sub: any;
-  constructor(private gameService: GameService, private userService: UserService, private alertService: AlertService, private route: ActivatedRoute, private confirmationService: ConfirmationService, private authenticationService: AuthenticationService) {
+  constructor(
+    private gameService: GameService,
+    private userService: UserService,
+    private alertService: AlertService,
+    private route: ActivatedRoute,
+    private confirmationService: ConfirmationService,
+    private authenticationService: AuthenticationService,
+    private refreshService: RefreshService) {
     this.gameDefinition = null;
     this.users = [];
     this._usersCurrentPage = 1;
@@ -34,11 +42,10 @@ export class CreateGameComponent implements OnInit {
 
       let id = params['id'];
 
-      this.gameService.getGameDefinitionDetails(id).subscribe(data=>{
-        this.gameDefinition = data;
-      });
+      this.gameService.getGameDefinitionDetails(id).subscribe(data => this.gameDefinition = data);
 
       this.refresh();
+      this.refreshService.getRefresher().subscribe(() => this.refresh());
     });
   }
 

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {AuthenticationService} from "../authentication.service";
 import {AlertService} from "../alert.service";
 import {Router} from "@angular/router";
+import {RefreshService} from "../refresh.service";
 
 @Component({
   selector: 'app-login',
@@ -12,11 +13,13 @@ export class LoginComponent implements OnInit {
 
   constructor(private authenticationService: AuthenticationService,
   private alertService: AlertService,
-  private router: Router) { }
+  private router: Router,
+  private refreshService: RefreshService) { }
 
   ngOnInit() {
     // reset login status
     this.authenticationService.logout();
+    this.refreshService.refresh();
   }
 
   onSubmit() {
@@ -24,8 +27,9 @@ export class LoginComponent implements OnInit {
     this.authenticationService
       .login(this.login_username, this.login_password)
       .subscribe(
-        data => {
+        () => {
           this.router.navigate(['/']);
+          this.refreshService.refresh();
         },
         error => {
           this.alertService.error(error);
