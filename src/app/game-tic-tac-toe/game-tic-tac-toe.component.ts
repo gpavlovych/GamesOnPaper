@@ -3,6 +3,7 @@ import {ModalDirective} from "ng2-bootstrap";
 import {GameDetails} from "../game";
 import {GameState} from "../game-state.enum";
 import {GameTicTacToeData} from "./game-tic-tac-toe-data";
+import {Sex} from "../sex.enum";
 
 @Component({
   selector: 'app-game-tic-tac-toe',
@@ -27,10 +28,12 @@ export class GameTicTacToeComponent implements OnInit {
       players: [{
         id: 1,
         userName: 'lisa ann',
+        sex: Sex.female,
         userPic: '',
       }, {
         id: 2,
         userName: 'mandingo',
+        sex: Sex.male,
         userPic: ''
       }],
       state: GameState.active,

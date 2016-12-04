@@ -15,17 +15,31 @@ export let fakeBackendProvider = {
     // array in local storage for registered users
     let users: any[] = JSON.parse(localStorage.getItem('users')) || [];
     let games: any[] = JSON.parse(localStorage.getItem('games')) || [];
-    let fakeUsersCount: number = 10;
-    let fakeUsers: UserInfo[]=[];
-    for (let i = 0; i < fakeUsersCount; i++) {
-      fakeUsers.push({
-        id: i + 1,
-        userName: "someUser " + i,
-        userPic: ""
-      });
+    function getUserFromToken(token: string) {
+      if (token) {
+        console.log(token);
+        let tokenMatch = token.match(/^Bearer fake_user_token:(.*)$/);
+        if (tokenMatch && tokenMatch.length > 1) {
+          let userName = tokenMatch[1];
+          for (let user of users) {
+            if (user.username == userName) {
+              return user;
+            }
+          }
+        }
+      }
+      return null;
     }
-    let gameDefinitionsCount = 2;
-    let gameDefinitions: GameDefinitionInfo[] = [
+
+    function toIdDictionary(arr: any[]){
+      var result = {};
+      for (let arrItem of arr) {
+        result[arrItem.id] = arrItem;
+      }
+      return result;
+    }
+
+    let gameDefinitionInfos: GameDefinitionInfo[] = [
       {
         id: 1,
         name: 'tic-tac-toe',
@@ -37,109 +51,49 @@ export let fakeBackendProvider = {
         icon: ''
       }
     ];
-    for (let i = 0; i < gameDefinitionsCount - 2; i++) {
-      gameDefinitions.push({
-        id: i + 3,
-        name: 'game' + i,
-        icon: ''
-      });
+
+    let userInfos: UserInfo[]=[];
+    for (let user of users){
+      let userInfo: UserInfo = {
+        id: user.id,
+        sex: user.sex || 0,
+        userName: user.username,
+        userPic: ""
+      };
+      userInfos.push(userInfo);
     }
 
-    let outgoingCount = 12;
-    let outgoing: GameInfo[] = [];
-    for (let i = 0; i < outgoingCount; i++) {
-      outgoing.push({
-        id: i+1,
-          gameDefinition: gameDefinitions[0],
-        state: GameState.new,
-        players: [users[0], {
-        id: 12+i,
-        userPic: '',
-        userName: 'user '+i
-      }],
+    let userInfosDictionary = toIdDictionary(userInfos);
+    let gameDefinitionInfosDictionary = toIdDictionary(gameDefinitionInfos);
+
+    let gameInfos: GameInfo[]= [];
+    for (let game of games) {
+      let gameDefinitionInfo: GameDefinitionInfo = gameDefinitionInfosDictionary[game.gameDefinitionId];
+
+      let players: UserInfo[] = [];
+      for (let playerId of game.playerIds) {
+        players.push(userInfosDictionary[playerId]);
+      }
+
+      let gameInfo: GameInfo = {
+        gameDefinition: gameDefinitionInfo,
+        players: players,
         activePlayer: 0,
-        winner: null
-      });
+        state: game.state,
+        id: game.id,
+        winner: game.winner
+      };
+
+      gameInfos.push(gameInfo);
     }
 
-    let incomingCount = 12;
-    let incoming: GameInfo[] = [];
-    for (let i = 0; i < incomingCount; i++) {
-      incoming.push({
-        id: i+1+outgoingCount,
-        gameDefinition: gameDefinitions[0],
-        state: GameState.new,
-        players: [{
-          id: 12+i,
-          userPic: '',
-          userName: 'user 2 '+i
-        }, users[0]],
-        activePlayer: 0,
-        winner: null
-      });
-    }
-    let activeCount = 15;
-    let active: GameInfo[] = [];
-    for (let i = 0; i < activeCount; i++) {
-      active.push({
-        id: i+1+outgoingCount+incomingCount,
-        gameDefinition: gameDefinitions[0],
-        state: GameState.active,
-        players: [{
-          id: 12+i,
-          userPic: '',
-          userName: 'user 2 '+i
-        }, users[0]],
-        activePlayer: 0,
-        winner: null
-      });
-      active.push({
-        id: i+1+outgoingCount+incomingCount,
-        gameDefinition: gameDefinitions[0],
-        state: GameState.active,
-        players: [users[0], {
-          id: 12+i,
-          userPic: '',
-          userName: 'user 1 '+i
-        }],
-        activePlayer: 0,
-        winner: null
-      });
-    }
-    let finishedCount = 15;
-    let finished: GameInfo[] = [];
-    for (let i = 0; i < activeCount; i++) {
-      for (let winner of [null, 0, 1]){
-      finished.push({
-        id: i+1+outgoingCount+incomingCount,
-        gameDefinition: gameDefinitions[0],
-        state: GameState.finished,
-        players: [{
-          id: 12+i,
-          userPic: '',
-          userName: 'user 2 '+i
-        }, users[0]],
-        activePlayer: 0,
-        winner: winner
-      });
-      finished.push({
-        id: i+1+outgoingCount+incomingCount,
-        gameDefinition: gameDefinitions[0],
-        state: GameState.finished,
-        players: [users[0], {
-          id: 12+i,
-          userPic: '',
-          userName: 'user 1 '+i
-        }],
-        activePlayer: 0,
-        winner: winner
-      });}
-    }
     // configure fake backend
     backend.connections.subscribe((connection: MockConnection) => {
       console.log('connection!');
       // wrap in timeout to simulate server api call
       setTimeout(() => {
+        let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+
         // authenticate
         if (connection.request.url.endsWith('/api/authenticate') && connection.request.method === RequestMethod.Post) {
           // get parameters from post request
@@ -160,7 +114,7 @@ export let fakeBackendProvider = {
                 username: user.username,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                token: 'fake-jwt-token'
+                token: 'fake_user_token:'+user.username
               }
             })));
           } else {
@@ -175,8 +129,8 @@ export let fakeBackendProvider = {
           let skip = parseInt(gameDefinitionsMatch[1]);
           let take = parseInt(gameDefinitionsMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinitions.slice(skip, take+skip) })));
+          if (authenticatedUser) {
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinitionInfos.slice(skip, take+skip) })));
           } else {
             // return 401 not authorised if token is null or invalid
             connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
@@ -186,11 +140,38 @@ export let fakeBackendProvider = {
         // get game definitions count
         if (connection.request.url.endsWith('/api/gamedefinitions/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinitions.length })));
+          if (authenticatedUser) {
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinitionInfos.length })));
           } else {
             // return 401 not authorised if token is null or invalid
             connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+          }
+        }
+
+        let incoming = [];
+        let outgoing = [];
+        let active = [];
+        let finished = [];
+        if (authenticatedUser) {
+          for (let gameInfo of gameInfos) {
+            for (let playerIdIndex = 0; playerIdIndex < gameInfo.players.length; playerIdIndex++) {
+              if (gameInfo.players[playerIdIndex].id == authenticatedUser.id) {
+                if (gameInfo.state == GameState.new) {
+                  if (playerIdIndex > 0) {
+                    incoming.push(gameInfo);
+                  }
+                  else {
+                    outgoing.push(gameInfo);
+                  }
+                }
+                if (gameInfo.state == GameState.active) {
+                  active.push(gameInfo);
+                }
+                if (gameInfo.state == GameState.finished) {
+                  finished.push(gameInfo);
+                }
+              }
+            }
           }
         }
 
@@ -200,7 +181,7 @@ export let fakeBackendProvider = {
           let skip = parseInt(incomingMatch[1]);
           let take = parseInt(incomingMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: incoming.slice(skip, take+skip) })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -211,7 +192,8 @@ export let fakeBackendProvider = {
         // get incoming invitations count
         if (connection.request.url.endsWith('/api/games/incoming/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: incoming.length })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -225,7 +207,8 @@ export let fakeBackendProvider = {
           let skip = parseInt(outgoingMatch[1]);
           let take = parseInt(outgoingMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: outgoing.slice(skip, take+skip) })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -236,7 +219,8 @@ export let fakeBackendProvider = {
         // get outgoing invitations count
         if (connection.request.url.endsWith('/api/games/outgoing/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: outgoing.length })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -250,7 +234,8 @@ export let fakeBackendProvider = {
           let skip = parseInt(activeMatch[1]);
           let take = parseInt(activeMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: active.slice(skip, take+skip) })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -261,7 +246,8 @@ export let fakeBackendProvider = {
         // get active games count
         if (connection.request.url.endsWith('/api/games/active/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: active.length })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -275,7 +261,8 @@ export let fakeBackendProvider = {
           let skip = parseInt(finishedMatch[1]);
           let take = parseInt(finishedMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: finished.slice(skip, take+skip) })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -286,7 +273,8 @@ export let fakeBackendProvider = {
         // get finished games count
         if (connection.request.url.endsWith('/api/games/finished/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: finished.length })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -300,8 +288,9 @@ export let fakeBackendProvider = {
           let skip = parseInt(usersMatch[1]);
           let take = parseInt(usersMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: fakeUsers.slice(skip, take+skip)})));
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: users.slice(skip, take+skip)})));
           } else {
             // return 401 not authorised if token is null or invalid
             connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
@@ -312,8 +301,9 @@ export let fakeBackendProvider = {
         let usersCountMatch = connection.request.url.match(/\/api\/users\/count$/);
         if (usersCountMatch && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: fakeUsers.length})));
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
+            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: users.length})));
           } else {
             // return 401 not authorised if token is null or invalid
             connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
@@ -323,7 +313,8 @@ export let fakeBackendProvider = {
         // get game definition by id
         if (connection.request.url.match(/\/api\/gamedefinitions\/\d+$/) && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             // find user by id in users array
             let urlParts = connection.request.url.split('/');
             let id = parseInt(urlParts[urlParts.length - 1]);
@@ -341,7 +332,8 @@ export let fakeBackendProvider = {
         // get user by id
         if (connection.request.url.match(/\/api\/users\/\d+$/) && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             // find user by id in users array
             let urlParts = connection.request.url.split('/');
             let id = parseInt(urlParts[urlParts.length - 1]);
@@ -382,6 +374,7 @@ export let fakeBackendProvider = {
           let createUserViewModel: CreateUserViewModel = JSON.parse(connection.request.getBody());
           let newUser: UserDetails = {
             id: users.length + 1,
+            sex: createUserViewModel.sex,
             firstName: createUserViewModel.firstName,
             lastName: createUserViewModel.lastName,
             password: createUserViewModel.password,
@@ -407,7 +400,8 @@ export let fakeBackendProvider = {
         // delete user
         if (connection.request.url.match(/\/api\/users\/\d+$/) && connection.request.method === RequestMethod.Delete) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
+          if (authenticatedUser) {
             // find user by id in users array
             let urlParts = connection.request.url.split('/');
             let id = parseInt(urlParts[urlParts.length - 1]);
@@ -420,7 +414,6 @@ export let fakeBackendProvider = {
                 break;
               }
             }
-
             // respond 200 OK
             connection.mockRespond(new Response(new ResponseOptions({ status: 200 })));
           } else {

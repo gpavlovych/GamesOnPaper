@@ -25,6 +25,7 @@ import { GameService } from "./game.service";
 import { CreateGameComponent } from './create-game/create-game.component';
 import { ConfirmationComponent } from './confirmation/confirmation.component';
 import {ConfirmationService} from "./confirmation.service";
+import { KeysPipe } from './keys.pipe';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -52,7 +53,8 @@ const appRoutes: Routes = [
     Top100playersComponent,
     AlertComponent,
     CreateGameComponent,
-    ConfirmationComponent
+    ConfirmationComponent,
+    KeysPipe
   ],
   imports: [
     BrowserModule,

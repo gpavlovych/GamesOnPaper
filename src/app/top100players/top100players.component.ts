@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {UserInfo} from "../user";
+import {Sex} from "../sex.enum";
 
 @Component({
   selector: 'app-top100players',
@@ -17,16 +18,19 @@ export class Top100playersComponent implements OnInit {
     {
       id: 112,
       userPic: "",
+      sex: Sex.male,
       userName: "kitty girl"
     },
     {
       id: 32,
       userPic: "",
+      sex: Sex.female,
       userName: "lisa ann"
     },
     {
       id: 455,
       userPic: "",
+      sex: Sex.female,
       userName: "red mistress"
     }];
 }

@@ -4,6 +4,7 @@ import { AlertService } from "../alert.service";
 import { UserService } from "../user.service";
 import { Router } from "@angular/router";
 import {CreateUserViewModel} from "../view-models/create-user-view-model";
+import {Sex} from "../sex.enum";
 
 @Component({
   selector: 'app-register',
@@ -21,6 +22,7 @@ export class RegisterComponent implements OnInit {
 
   newUser(){
     this.user = {
+      sex: Sex.male,
       lastName: '',
       firstName: '',
       username: '',
@@ -46,5 +48,6 @@ export class RegisterComponent implements OnInit {
   }
 
   loading: boolean = false;
+  private Sex = Sex;
   user: CreateUserViewModel;
 }
