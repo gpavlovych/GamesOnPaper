@@ -399,12 +399,28 @@ export let fakeBackendProvider = {
           // respond 200 OK
           connection.mockRespond(new Response(new ResponseOptions({ status: 200 })));
         }
+
         let gameAcceptMatch = connection.request.url.match(/\/api\/games\/(\d+)\/accept$/);
         if (gameAcceptMatch && gameAcceptMatch.length > 1 && connection.request.method === RequestMethod.Post) {
           let id = parseInt(gameAcceptMatch[1]);
           for (let game of games){
             if (game.id == id) {
               game.state = GameState.active;
+              localStorage.setItem('games', JSON.stringify(games));
+              // respond 200 OK
+              connection.mockRespond(new Response(new ResponseOptions({status: 200})));
+              return;
+            }
+          }
+          connection.mockRespond(new Response(new ResponseOptions({status: 401})))
+        }
+
+        let gameDeclineMatch = connection.request.url.match(/\/api\/games\/(\d+)\/decline/);
+        if (gameDeclineMatch && gameDeclineMatch.length > 1 && connection.request.method === RequestMethod.Post) {
+          let id = parseInt(gameDeclineMatch[1]);
+          for (let game of games){
+            if (game.id == id) {
+              game.state = GameState.declined;
               localStorage.setItem('games', JSON.stringify(games));
               // respond 200 OK
               connection.mockRespond(new Response(new ResponseOptions({status: 200})));

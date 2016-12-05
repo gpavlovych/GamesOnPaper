@@ -25,8 +25,8 @@
               <a>
                 <app-user-avatar [user]="incomingInvitation.players[0]"></app-user-avatar>
                 {{incomingInvitation.players[0].userName}} invited you to play {{incomingInvitation.gameDefinition.name}}!
-                <button type="button" class="btn btn-default" (click)="accept(incomingInvitation.id)"><span class="glyphicon glyphicon-ok"></span></button>
-                <button type="button" class="btn btn-default" (click)="decline(incomingInvitation.id)"><span class="glyphicon glyphicon-remove"></span></button>
+                <button type="button" class="btn btn-default" (click)="accept(incomingInvitation)"><span class="glyphicon glyphicon-ok"></span></button>
+                <button type="button" class="btn btn-default" (click)="decline(incomingInvitation)"><span class="glyphicon glyphicon-remove"></span></button>
               </a>
             </li>
             <li *ngIf="incomingInvitationsTotalCount>incomingInvitationsTop"><a [routerLink]="['/']">Show more</a></li>
@@ -38,7 +38,7 @@
                   <a>
                     <app-user-avatar [user]="outgoingInvitation.players[0]"></app-user-avatar>
                     {{outgoingPlayer.userName}} invited to play {{outgoingInvitation.gameDefinition.name}} with you!
-                    <button type="button" class="btn btn-default" (click)="decline(outgoingInvitation.id)"><span class="glyphicon glyphicon-remove"></span></button>
+                    <button type="button" class="btn btn-default" (click)="decline(outgoingInvitation)"><span class="glyphicon glyphicon-remove"></span></button>
                   </a>
                 </li>
               </template>
@@ -53,10 +53,12 @@
               <li class="dropdown-header">{{game.key}}</li>
               <li *ngFor="let activeGame of game.value">
                 <a>
-                  <template ngFor let-gamePlayer [ngForOf]="activeGame.players" let-gamePlayerIndex="index">
-                    <app-user-avatar [user]="activeGame.players[0]"></app-user-avatar>
-                    <span class="label" [ngClass]="{'label-success': (gamePlayerIndex == activeGame.winner), 'label-default':(gamePlayerIndex != activeGame.winner)}">{{gamePlayer.userName}}</span>
-                  </template>
+                  <a [routerLink]="['/game/'+activeGame.id]">
+                    <template ngFor let-gamePlayer [ngForOf]="activeGame.players" let-gamePlayerIndex="index">
+                      <app-user-avatar [user]="activeGame.players[0]"></app-user-avatar>
+                      <span class="label" [ngClass]="{'label-success': (gamePlayerIndex == activeGame.winner), 'label-default':(gamePlayerIndex != activeGame.winner)}">{{gamePlayer.userName}}</span>
+                    </template>
+                  </a>
                   <button type="button" class="btn btn-default" (click)="gameService.finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
                   <span *ngIf="activeGame.finishedBy && activeGame.finishedBy!=user.username">
                     {{activeGame.finishedBy}} wants to finish the game. Do you agree?

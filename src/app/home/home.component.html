@@ -37,8 +37,8 @@
           </tr>
           <tr>
             <td>
-              <button type="button" class="btn btn-default" (click)="accept(incomingInvitation.id)">Accept</button>
-              <button type="button" class="btn btn-default" (click)="decline(incomingInvitation.id)">Decline</button>
+              <button type="button" class="btn btn-default" (click)="accept(incomingInvitation)">Accept</button>
+              <button type="button" class="btn btn-default" (click)="decline(incomingInvitation)">Decline</button>
             </td>
           </tr>
         </template>
@@ -71,7 +71,7 @@
             </tr>
             <tr *ngIf="i!=outgoingInvitation.activePlayer">
               <td>
-                <button type="button" class="btn btn-default" (click)="decline(outgoingInvitation.id)">Decline</button>
+                <button type="button" class="btn btn-default" (click)="decline(outgoingInvitation)">Decline</button>
               </td>
             </tr>
           </template>
@@ -102,10 +102,12 @@
           <template ngFor let-activeGame [ngForOf]="activeGameGrouped.value">
             <tr>
               <td>
-                <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
-                  <app-user-avatar [user]="player"></app-user-avatar>
-                  <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
-                </template>
+                <a [routerLink]="['/game/'+activeGame.id]">
+                  <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
+                    <app-user-avatar [user]="player"></app-user-avatar>
+                    <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
+                  </template>
+                </a>
               </td>
             </tr>
           </template>

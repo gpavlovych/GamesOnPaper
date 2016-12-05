@@ -76,16 +76,25 @@ export class AppComponent implements OnInit {
     };
   }
 
-  accept(gameId: any) {
-    this.gameService.accept(gameId).subscribe(() => {
-      this.alertService.successWithLink("You've just accepted the game invitation from sm1","/game/1", "Go to game");
+  getUserName(user: UserInfo) {
+    if (this.authenticationService.getAuthorizedUserId() == user.id){
+      return "yourself";
+    }
+    else {
+      return user.userName;
+    }
+  }
+
+  accept(game: GameInfo) {
+    this.gameService.accept(game.id).subscribe(() => {
+      this.alertService.successWithLink("You've just accepted the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
       this.refreshService.refresh();
     });
   }
 
-  decline(gameId: any) {
-    this.gameService.decline(gameId).subscribe(() => {
-      this.alertService.successWithLink("You've just declined the game invitation from sm1","/game/1", "Go to game");
+  decline(game: GameInfo) {
+    this.gameService.decline(game.id).subscribe(() => {
+      this.alertService.successWithLink("You've just declined the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
       this.refreshService.refresh();
     });
   }

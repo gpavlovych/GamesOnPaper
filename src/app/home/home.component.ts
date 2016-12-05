@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { GameDefinitionInfo } from "../game-definition";
 import { GameInfo } from "../game";
-import { UserDetails } from "../user";
+import {UserDetails, UserInfo} from "../user";
 import { AuthenticationService } from "../authentication.service";
 import { GameService } from "../game.service";
 import { UserService } from "../user.service";
 import {RefreshService} from "../refresh.service";
+import {AlertService} from "../alert.service";
 
 @Component({
   selector: 'app-home',
@@ -16,7 +17,8 @@ export class HomeComponent implements OnInit {
   constructor(private authenticationService: AuthenticationService,
               private gameService: GameService,
               private userService: UserService,
-              private refreshService: RefreshService) {
+              private refreshService: RefreshService,
+              private alertService: AlertService) {
     this.inited = false;
 
     this.finishedGames = [];
@@ -239,14 +241,25 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  accept(gameId: any) {
-    this.gameService.accept(gameId).subscribe(() => {
+  getUserName(user: UserInfo) {
+    if (this.authenticationService.getAuthorizedUserId() == user.id){
+      return "yourself";
+    }
+    else {
+      return user.userName;
+    }
+  }
+
+  accept(game: GameInfo) {
+    this.gameService.accept(game.id).subscribe(() => {
+      this.alertService.successWithLink("You've just accepted the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
       this.refreshService.refresh();
     });
   }
 
-  decline(gameId: any) {
-    this.gameService.decline(gameId).subscribe(() => {
+  decline(game: GameInfo) {
+    this.gameService.decline(game.id).subscribe(() => {
+      this.alertService.successWithLink("You've just declined the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
       this.refreshService.refresh();
     });
   }
