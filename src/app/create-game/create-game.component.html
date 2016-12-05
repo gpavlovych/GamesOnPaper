@@ -12,7 +12,7 @@
         <h4>Users</h4>
         <table class="table">
           <tr *ngFor="let user of users">
-            <td><img src="{{user.userPic || 'assets/images/male_unknown.png'}}" class="img-circle" width="50" height="50"/>{{user.userName}}</td>
+            <td><app-user-avatar [user]="user"></app-user-avatar>{{user.username}}</td>
             <td><button (click)="inviteUser(user)">Invite</button></td>
           </tr>
         </table>

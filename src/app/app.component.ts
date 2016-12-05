@@ -8,6 +8,7 @@ import { GameService } from "./game.service";
 import { AuthenticationService } from "./authentication.service";
 import {UserService} from "./user.service";
 import {RefreshService} from "./refresh.service";
+import {AlertService} from "./alert.service";
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,8 @@ export class AppComponent implements OnInit {
     private gameService: GameService,
     private authenticationService: AuthenticationService,
     private userService: UserService,
-    private refreshService: RefreshService)
+    private refreshService: RefreshService,
+    private alertService: AlertService)
   {
     componentsHelper.setRootViewContainerRef(vcr);
   }
@@ -34,72 +36,35 @@ export class AppComponent implements OnInit {
   refresh() {
     this.gamesToBeCreated = [];
     this.gamesToBeCreatedTotalCount = 0;
+
     this.incomingInvitations = [];
     this.incomingInvitationsTotalCount = 0;
+
     this.outgoingInvitations = [];
     this.outgoingInvitationsTotalCount = 0;
+
     this.user = null;
 
     let userId = this.authenticationService.getAuthorizedUserId();
-    if (userId) {
-      this.userService.getById(userId).subscribe(data => {
-        this.user = data;
-        console.log("data");
-      });
+    if (userId)
+    {
+      this.userService.getById(userId).subscribe(data => this.user = data);
     }
 
     this.gameService.getGameDefinitions(0, this.gamesToBeCreatedTop).subscribe(data => this.gamesToBeCreated = data);
-
     this.gameService.getGameDefinitionsCount().subscribe(data => this.gamesToBeCreatedTotalCount = data);
 
-    this.gameService.getIncoming(0, this.incomingInvitationsTop).subscribe(
-      data => {
-        this.incomingInvitations = data;
-        console.log('incoming '+JSON.stringify(data));
-      }
-    );
+    this.gameService.getIncoming(0, this.incomingInvitationsTop).subscribe(data => this.incomingInvitations = data);
+    this.gameService.getIncomingCount().subscribe(data => this.incomingInvitationsTotalCount = data);
 
-    this.gameService.getIncomingCount().subscribe(
-      data => {
-        this.incomingInvitationsTotalCount = data;
-      }
-    );
+    this.gameService.getOutgoing(0, this.outgoingInvitationsTop).subscribe(data => this.outgoingInvitations = data);
+    this.gameService.getOutgoingCount().subscribe(data => this.outgoingInvitationsTotalCount = data);
 
-    this.gameService.getOutgoing(0, this.outgoingInvitationsTop).subscribe(
-      data => {
-        this.outgoingInvitations = data;
-      }
-    );
+    this.gameService.getActive(0, this.activeGamesTop).subscribe(data => this.activeGames = data);
+    this.gameService.getActiveCount().subscribe(data => this.activeGamesTotalCount = data);
 
-    this.gameService.getOutgoingCount().subscribe(
-      data => {
-        this.outgoingInvitationsTotalCount = data;
-      }
-    );
-
-    this.gameService.getActive(0, this.activeGamesTop).subscribe(
-      data => {
-        this.activeGames = data;
-      }
-    );
-
-    this.gameService.getActiveCount().subscribe(
-      data => {
-        this.activeGamesTotalCount = data;
-      }
-    );
-
-    this.gameService.getFinished(0, this.finishedGamesTop).subscribe(
-      data => {
-        this.finishedGames = data;
-      }
-    );
-
-    this.gameService.getFinishedCount().subscribe(
-      data => {
-        this.finishedGamesTotalCount = data;
-      }
-    );
+    this.gameService.getFinished(0, this.finishedGamesTop).subscribe(data => this.finishedGames = data);
+    this.gameService.getFinishedCount().subscribe(data => this.finishedGamesTotalCount = data);
   }
 
   getUserInfo(user: UserDetails): UserInfo {
@@ -109,6 +74,20 @@ export class AppComponent implements OnInit {
       userName: user.username,
       userPic: user.userPic
     };
+  }
+
+  accept(gameId: any) {
+    this.gameService.accept(gameId).subscribe(() => {
+      this.alertService.successWithLink("You've just accepted the game invitation from sm1","/game/1", "Go to game");
+      this.refreshService.refresh();
+    });
+  }
+
+  decline(gameId: any) {
+    this.gameService.decline(gameId).subscribe(() => {
+      this.alertService.successWithLink("You've just declined the game invitation from sm1","/game/1", "Go to game");
+      this.refreshService.refresh();
+    });
   }
 
   gamesToBeCreated: GameDefinitionInfo[];

@@ -103,6 +103,7 @@
             <tr>
               <td>
                 <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
+                  <app-user-avatar [user]="player"></app-user-avatar>
                   <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
                 </template>
               </td>
@@ -136,6 +137,7 @@
             <tr>
               <td>
                 <template ngFor let-player [ngForOf]="finishedGame.players" let-i="index">
+                  <app-user-avatar [user]="player"></app-user-avatar>
                   <label class="label" [ngClass]="{'label-default': finishedGame.winner==null, 'label-success': finishedGame.winner==i, 'label-danger': finishedGame.winner!=null && finishedGame.winner!=i}">
                     {{player.userName}}
                   </label>
