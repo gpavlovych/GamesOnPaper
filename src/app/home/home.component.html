@@ -102,11 +102,23 @@
           <template ngFor let-activeGame [ngForOf]="activeGameGrouped.value">
             <tr>
               <td>
-                <a [routerLink]="['/game/'+activeGame.id]">
-                  <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
-                    <app-user-avatar [user]="player"></app-user-avatar>
-                    <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
-                  </template>
+                <a>
+                  <a [routerLink]="['/game/'+activeGame.id]">
+                    <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
+                      <app-user-avatar [user]="player"></app-user-avatar>
+                      <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
+                    </template>
+                  </a>
+                  <button *ngIf="!activeFinishRequests[activeGame.id]" type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
+                  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id != user.id">
+                    {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game. Do you agree?
+                    <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-ok"></span>Ok</button>
+                    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+                  </span>
+                  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id == user.id">
+                    You want to finish the game. Waiting for opponent decision.
+                    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+                  </span>
                 </a>
               </td>
             </tr>

@@ -64,12 +64,7 @@ export class AppComponent implements OnInit {
     this.gameService.getActive(0, this.activeGamesTop).subscribe(data => {
         if (data) {
           this.activeGames = data;
-          for (let activeGame of this.activeGames) {
-            let activeGameFinishRequest = this.getActiveFinishRequest(activeGame);
-            if (activeGameFinishRequest) {
-              this.activeFinishRequests[activeGame.id] = activeGameFinishRequest;
-            }
-          }
+          this.refreshActiveGameFinishedRequests();
         }
       }
     );
@@ -78,6 +73,15 @@ export class AppComponent implements OnInit {
 
     this.gameService.getFinished(0, this.finishedGamesTop).subscribe(data => this.finishedGames = data);
     this.gameService.getFinishedCount().subscribe(data => this.finishedGamesTotalCount = data);
+  }
+
+  private refreshActiveGameFinishedRequests() {
+    for (let activeGame of this.activeGames) {
+      let activeGameFinishRequest = this.getActiveFinishRequest(activeGame);
+      if (activeGameFinishRequest) {
+        this.activeFinishRequests[activeGame.id] = activeGameFinishRequest;
+      }
+    }
   }
 
   getUserInfo(user: UserDetails): UserInfo {

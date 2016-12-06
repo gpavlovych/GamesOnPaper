@@ -7,6 +7,7 @@ import { GameService } from "../game.service";
 import { UserService } from "../user.service";
 import {RefreshService} from "../refresh.service";
 import {AlertService} from "../alert.service";
+import {GameFinishRequestState} from "../game-finish-request-state.enum";
 
 @Component({
   selector: 'app-home',
@@ -130,9 +131,15 @@ export class HomeComponent implements OnInit {
   activeGamesTotalCount: number;
 
   private refreshActiveGames() {
+    this.activeGames = [];
+    this.activeFinishRequests={};
+
     this.gameService.getActive(this.activeGamesTop * (this.activeGamesCurrentPage - 1), this.activeGamesTop).subscribe(
       data => {
-        this.activeGames = data;
+        if (data) {
+          this.activeGames = data;
+          this.refreshActiveGameFinishedRequests();
+        }
       }
     );
   }
@@ -264,5 +271,45 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  finish(game: GameInfo) {
+    this.gameService.requestFinish({gameId: game.id}).subscribe(()=>{
+      this.alertService.success("You've just requested the game finish");
+      this.refreshService.refresh();
+    });
+  }
+
+  finishApprove(gameFinishRequestId: any) {
+    this.gameService.requestFinishApprove(gameFinishRequestId).subscribe(()=>{
+      this.alertService.success("You've just approved the game finish request");
+      this.refreshService.refresh();
+    });
+  }
+
+  finishDecline(gameFinishRequestId: any) {
+    this.gameService.requestFinishDecline(gameFinishRequestId).subscribe(()=>{
+      this.alertService.success("You've just declined the game finish request");
+      this.refreshService.refresh();
+    });
+  }
+
+  private getActiveFinishRequest(game: GameInfo){
+    for (let gameRequest of game.finishRequests){
+      if (gameRequest.state == GameFinishRequestState.new){
+        return gameRequest;
+      }
+    }
+    return null;
+  }
+
+  private refreshActiveGameFinishedRequests() {
+    for (let activeGame of this.activeGames) {
+      let activeGameFinishRequest = this.getActiveFinishRequest(activeGame);
+      if (activeGameFinishRequest) {
+        this.activeFinishRequests[activeGame.id] = activeGameFinishRequest;
+      }
+    }
+  }
+
+  activeFinishRequests: {};
   user: UserDetails;//TODO: best approach to user login
 }
