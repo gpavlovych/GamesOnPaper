@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Http, Response} from "@angular/http";
-import { AuthenticationService } from "./authentication.service";
-import {GameDefinitionInfo} from "./game-definition";
-import {GameDetails, FinishRequestInfo, FinishApprovalState} from "./game";
-import {GameState} from "./game-state.enum";
+import {AuthenticationService} from "./authentication.service";
 import {CreateGameViewModel} from "./view-models/create-game-view-model";
+import {CreateGameFinishRequestViewModel} from "./view-models/create-game-finish-request-view-model";
+import {GameFinishRequestState} from "./game-finish-request-state.enum";
 
 @Injectable()
 export class GameService {
@@ -88,23 +87,18 @@ export class GameService {
     return this.http.post('/api/games', game, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  update<T>(game: GameDetails<T>)
+  requestFinish(gameFinishRequest: CreateGameFinishRequestViewModel)
   {
-    return this.http.put('/api/games/' + game.id, game, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
+    return this.http.post('/api/gamefinishingrequests', gameFinishRequest, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  getFinishRequests(gameId: any)
+  requestFinishApprove(id: any)
   {
-    return this.http.get('/api/gamefinishes?gameId='+gameId, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
+    return this.http.post('/api/gamefinishingrequests/'+id+'/approve', this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  createFinishRequest(gameId: any)
+  requestFinishDecline(id: any)
   {
-    return this.http.post('/api/gamefinishes', {gameId: gameId}, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
-  }
-
-  createFinishApproval(finishRequestId: any, state: FinishApprovalState)
-  {
-    return this.http.post('/api/gamefinishapprovals', {finishRequestId: finishRequestId, state: state}, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
+    return this.http.post('/api/gamefinishingrequests/'+id+'/decline', this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 }

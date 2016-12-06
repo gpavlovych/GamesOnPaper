@@ -9,6 +9,7 @@ import { AuthenticationService } from "./authentication.service";
 import {UserService} from "./user.service";
 import {RefreshService} from "./refresh.service";
 import {AlertService} from "./alert.service";
+import {GameFinishRequestState} from "./game-finish-request-state.enum";
 
 @Component({
   selector: 'app-root',
@@ -39,6 +40,7 @@ export class AppComponent implements OnInit {
 
     this.incomingInvitations = [];
     this.incomingInvitationsTotalCount = 0;
+    this.activeFinishRequests = {};
 
     this.outgoingInvitations = [];
     this.outgoingInvitationsTotalCount = 0;
@@ -46,8 +48,7 @@ export class AppComponent implements OnInit {
     this.user = null;
 
     let userId = this.authenticationService.getAuthorizedUserId();
-    if (userId)
-    {
+    if (userId) {
       this.userService.getById(userId).subscribe(data => this.user = data);
     }
 
@@ -60,7 +61,19 @@ export class AppComponent implements OnInit {
     this.gameService.getOutgoing(0, this.outgoingInvitationsTop).subscribe(data => this.outgoingInvitations = data);
     this.gameService.getOutgoingCount().subscribe(data => this.outgoingInvitationsTotalCount = data);
 
-    this.gameService.getActive(0, this.activeGamesTop).subscribe(data => this.activeGames = data);
+    this.gameService.getActive(0, this.activeGamesTop).subscribe(data => {
+        if (data) {
+          this.activeGames = data;
+          for (let activeGame of this.activeGames) {
+            let activeGameFinishRequest = this.getActiveFinishRequest(activeGame);
+            if (activeGameFinishRequest) {
+              this.activeFinishRequests[activeGame.id] = activeGameFinishRequest;
+            }
+          }
+        }
+      }
+    );
+
     this.gameService.getActiveCount().subscribe(data => this.activeGamesTotalCount = data);
 
     this.gameService.getFinished(0, this.finishedGamesTop).subscribe(data => this.finishedGames = data);
@@ -99,6 +112,36 @@ export class AppComponent implements OnInit {
     });
   }
 
+  finish(game: GameInfo) {
+    this.gameService.requestFinish({gameId: game.id}).subscribe(()=>{
+      this.alertService.success("You've just requested the game finish");
+      this.refreshService.refresh();
+    });
+  }
+
+  finishApprove(gameFinishRequestId: any) {
+    this.gameService.requestFinishApprove(gameFinishRequestId).subscribe(()=>{
+      this.alertService.success("You've just approved the game finish request");
+      this.refreshService.refresh();
+    });
+  }
+
+  finishDecline(gameFinishRequestId: any) {
+    this.gameService.requestFinishDecline(gameFinishRequestId).subscribe(()=>{
+      this.alertService.success("You've just declined the game finish request");
+      this.refreshService.refresh();
+    });
+  }
+
+  private getActiveFinishRequest(game: GameInfo){
+    for (let gameRequest of game.finishRequests){
+      if (gameRequest.state == GameFinishRequestState.new){
+        return gameRequest;
+      }
+    }
+    return null;
+  }
+
   gamesToBeCreated: GameDefinitionInfo[];
   gamesToBeCreatedTop: number = 10;
   gamesToBeCreatedTotalCount: number;
@@ -120,4 +163,6 @@ export class AppComponent implements OnInit {
   finishedGamesTotalCount: number;
 
   user: UserDetails;
+
+  activeFinishRequests: {};
 }

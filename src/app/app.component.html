@@ -59,15 +59,15 @@
                       <span class="label" [ngClass]="{'label-success': (gamePlayerIndex == activeGame.winner), 'label-default':(gamePlayerIndex != activeGame.winner)}">{{gamePlayer.userName}}</span>
                     </template>
                   </a>
-                  <button type="button" class="btn btn-default" (click)="gameService.finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
-                  <span *ngIf="activeGame.finishedBy && activeGame.finishedBy!=user.username">
-                    {{activeGame.finishedBy}} wants to finish the game. Do you agree?
-                    <button type="button" class="btn btn-default" (click)="gameService.finishApprove(activeGame)"><span class="glyphicon glyphicon-ok"></span>Ok</button>
-                    <button type="button" class="btn btn-default" (click)="gameService.finishCancel(activeGame)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+                  <button *ngIf="!activeFinishRequests[activeGame.id]" type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
+                  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id != user.id">
+                    {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game. Do you agree?
+                    <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-ok"></span>Ok</button>
+                    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
                   </span>
-                  <span *ngIf="activeGame.finishedBy && activeGame.finishedBy==user.username">
+                  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id == user.id">
                     You want to finish the game. Waiting for opponent decision.
-                    <button type="button" class="btn btn-default" (click)="gameService.finishCancel(activeGame)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+                    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
                   </span>
                 </a>
               </li>

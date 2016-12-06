@@ -1,12 +1,15 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import {GameDefinitionInfo, GameDefinitionDetails} from "./game-definition";
-import { GameInfo } from "./game";
+import {GameInfo, Game} from "./game";
 import {GameState} from "./game-state.enum";
-import {UserInfo, UserDetails} from "./user";
+import {UserInfo, UserDetails, User} from "./user";
 import {CreateGameViewModel} from "./view-models/create-game-view-model";
-import {GameViewModel} from "./view-models/game-view-model";
 import {CreateUserViewModel} from "./view-models/create-user-view-model";
+import {GameFinishRequest} from "./game-finish-request";
+import {GameFinishRequestState} from "./game-finish-request-state.enum";
+import {GameFinishRequestInfo} from "./game-finish-request-info";
+import {CreateGameFinishRequestViewModel} from "./view-models/create-game-finish-request-view-model";
 
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
@@ -21,11 +24,13 @@ export let fakeBackendProvider = {
 //      console.log('connection!');
       // wrap in timeout to simulate server api call
       setTimeout(() => {
-        let users: UserDetails[] = JSON.parse(localStorage.getItem('users')) || [];
-        let games: any[] = JSON.parse(localStorage.getItem('games')) || [];
+        let users: User[] = JSON.parse(localStorage.getItem('users')) || [];
+        let games: Game[] = JSON.parse(localStorage.getItem('games')) || [];
+        let gameFinishRequests: GameFinishRequest[] = JSON.parse(localStorage.getItem('gameFinishRequests')) || [];
+        console.log("url:"+connection.request.url);
+
         function getUserFromToken(token: string) {
           if (token) {
-//        console.log(token);
             let tokenMatch = token.match(/^Bearer fake_user_token:(.*)$/);
             if (tokenMatch && tokenMatch.length > 1) {
               let userName = tokenMatch[1];
@@ -39,8 +44,8 @@ export let fakeBackendProvider = {
           return null;
         }
 
-        function toIdDictionary(arr: any[]){
-          var result = {};
+        function toIdDictionary(arr: any[]) {
+          let result = {};
           for (let arrItem of arr) {
             result[arrItem.id] = arrItem;
           }
@@ -60,8 +65,8 @@ export let fakeBackendProvider = {
           }
         ];
 
-        let userInfos: UserInfo[]=[];
-        for (let user of users){
+        let userInfos: UserInfo[] = [];
+        for (let user of users) {
           let userInfo: UserInfo = {
             id: user.id,
             sex: user.sex || 0,
@@ -74,7 +79,7 @@ export let fakeBackendProvider = {
         let userInfosDictionary = toIdDictionary(userInfos);
         let gameDefinitionInfosDictionary = toIdDictionary(gameDefinitionInfos);
 
-        let gameInfos: GameInfo[]= [];
+        let gameInfos: GameInfo[] = [];
         for (let game of games) {
           let gameDefinitionInfo: GameDefinitionInfo = gameDefinitionInfosDictionary[game.gameDefinitionId];
 
@@ -86,13 +91,26 @@ export let fakeBackendProvider = {
           let gameInfo: GameInfo = {
             gameDefinition: gameDefinitionInfo,
             players: players,
-            activePlayer: 0,
             state: game.state,
             id: game.id,
-            winner: game.winner
+            createdBy: userInfos[game.createdById],
+            createdDate: game.createdDate,
+            finishRequests: [],
+            winner: userInfos[game.winnerId]
           };
 
           gameInfos.push(gameInfo);
+        }
+        let gameInfosDictionary = toIdDictionary(gameInfos);
+
+        for (let gameFinishRequest of gameFinishRequests) {
+          let gameFinishRequestInfo: GameFinishRequestInfo = {
+            createdBy: userInfosDictionary[gameFinishRequest.createdById],
+            createdDate: gameFinishRequest.createdDate,
+            id: gameFinishRequest.id,
+            state: gameFinishRequest.state
+          };
+          gameInfosDictionary[gameFinishRequest.gameId].finishRequests.push(gameFinishRequestInfo);
         }
 
         let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
@@ -117,7 +135,7 @@ export let fakeBackendProvider = {
                 username: user.username,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                token: 'fake_user_token:'+user.username
+                token: 'fake_user_token:' + user.username
               }
             })));
           } else {
@@ -133,10 +151,13 @@ export let fakeBackendProvider = {
           let take = parseInt(gameDefinitionsMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinitionInfos.slice(skip, take+skip) })));
+            connection.mockRespond(new Response(new ResponseOptions({
+              status: 200,
+              body: gameDefinitionInfos.slice(skip, take + skip)
+            })));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -144,10 +165,10 @@ export let fakeBackendProvider = {
         if (connection.request.url.endsWith('/api/gamedefinitions/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinitionInfos.length })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameDefinitionInfos.length})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -185,22 +206,24 @@ export let fakeBackendProvider = {
           let take = parseInt(incomingMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: incoming.slice(skip, take+skip) })));
+            connection.mockRespond(new Response(new ResponseOptions({
+              status: 200,
+              body: incoming.slice(skip, take + skip)
+            })));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // get incoming invitations count
         if (connection.request.url.endsWith('/api/games/incoming/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: incoming.length })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: incoming.length})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -210,24 +233,25 @@ export let fakeBackendProvider = {
           let skip = parseInt(outgoingMatch[1]);
           let take = parseInt(outgoingMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: outgoing.slice(skip, take+skip) })));
+            connection.mockRespond(new Response(new ResponseOptions({
+              status: 200,
+              body: outgoing.slice(skip, take + skip)
+            })));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // get outgoing invitations count
         if (connection.request.url.endsWith('/api/games/outgoing/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: outgoing.length })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: outgoing.length})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -237,24 +261,25 @@ export let fakeBackendProvider = {
           let skip = parseInt(activeMatch[1]);
           let take = parseInt(activeMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: active.slice(skip, take+skip) })));
+            connection.mockRespond(new Response(new ResponseOptions({
+              status: 200,
+              body: active.slice(skip, take + skip)
+            })));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // get active games count
         if (connection.request.url.endsWith('/api/games/active/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: active.length })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: active.length})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -264,24 +289,25 @@ export let fakeBackendProvider = {
           let skip = parseInt(finishedMatch[1]);
           let take = parseInt(finishedMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: finished.slice(skip, take+skip) })));
+            connection.mockRespond(new Response(new ResponseOptions({
+              status: 200,
+              body: finished.slice(skip, take + skip)
+            })));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // get finished games count
         if (connection.request.url.endsWith('/api/games/finished/count') && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: finished.length })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: finished.length})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -291,12 +317,14 @@ export let fakeBackendProvider = {
           let skip = parseInt(usersMatch[1]);
           let take = parseInt(usersMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: users.slice(skip, take+skip)})));
+            connection.mockRespond(new Response(new ResponseOptions({
+              status: 200,
+              body: users.slice(skip, take + skip)
+            })));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
@@ -304,71 +332,78 @@ export let fakeBackendProvider = {
         let usersCountMatch = connection.request.url.match(/\/api\/users\/count$/);
         if (usersCountMatch && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: users.length})));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: users.length})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // get game definition by id
         if (connection.request.url.match(/\/api\/gamedefinitions\/\d+$/) && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
             // find user by id in users array
             let urlParts = connection.request.url.split('/');
             let id = parseInt(urlParts[urlParts.length - 1]);
 
-            let gameDefinition: GameDefinitionDetails = {id: id, icon:"", name:"tic tac toe"};
+            let gameDefinition: GameDefinitionDetails = {id: id, icon: "", name: "tic tac toe"};
 
             // respond 200 OK with user
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: gameDefinition })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameDefinition})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // get user by id
         if (connection.request.url.match(/\/api\/users\/\d+$/) && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
-          let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));
           if (authenticatedUser) {
             // find user by id in users array
             let urlParts = connection.request.url.split('/');
             let id = parseInt(urlParts[urlParts.length - 1]);
-            let matchedUsers = users.filter(user => { return user.id === id; });
+            let matchedUsers = users.filter(user => {
+              return user.id === id;
+            });
             let user = matchedUsers.length ? matchedUsers[0] : null;
 
             // respond 200 OK with user
-            connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: user })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: user})));
           } else {
             // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(new ResponseOptions({ status: 401 })));
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
           }
         }
 
         // create game
         if (connection.request.url.endsWith('/api/games') && connection.request.method === RequestMethod.Post) {
-          // get new game object from post body
-          let newGameCreateVm: CreateGameViewModel = JSON.parse(connection.request.getBody());
-          let newGame: GameViewModel = {
-            id: games.length+1,
-            data: {},
-            playerIds: newGameCreateVm.playerIds,
-            gameDefinitionId: newGameCreateVm.gameDefinitionId,
-            state: GameState.new
-          };
+          if (authenticatedUser) {
+            // get new game object from post body
+            let newGameCreateVm: CreateGameViewModel = JSON.parse(connection.request.getBody());
+            let newGame: Game = {
+              id: games.length + 1,
+              data: {},
+              createdDate: new Date(),
+              createdById: authenticatedUser.id,
+              playerIds: newGameCreateVm.playerIds,
+              winnerId: null,
+              gameDefinitionId: newGameCreateVm.gameDefinitionId,
+              state: GameState.new
+            };
 
-          // save new game
-          games.push(newGame);
-          localStorage.setItem('games', JSON.stringify(games));
+            // save new game
+            games.push(newGame);
+            localStorage.setItem('games', JSON.stringify(games));
 
-          // respond 200 OK
-          connection.mockRespond(new Response(new ResponseOptions({ status: 200, body: newGame.id })));
+            // respond 200 OK
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: newGame.id})));
+          }
+          else {
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
+          }
         }
 
         // create user
@@ -386,7 +421,9 @@ export let fakeBackendProvider = {
           };
 
           // validation
-          let duplicateUser = users.filter(user => { return user.username === newUser.username; }).length;
+          let duplicateUser = users.filter(user => {
+            return user.username === newUser.username;
+          }).length;
           if (duplicateUser) {
             return connection.mockError(new Error('Username "' + newUser.username + '" is already taken'));
           }
@@ -397,13 +434,13 @@ export let fakeBackendProvider = {
           localStorage.setItem('users', JSON.stringify(users));
 
           // respond 200 OK
-          connection.mockRespond(new Response(new ResponseOptions({ status: 200 })));
+          connection.mockRespond(new Response(new ResponseOptions({status: 200})));
         }
 
         let gameAcceptMatch = connection.request.url.match(/\/api\/games\/(\d+)\/accept$/);
         if (gameAcceptMatch && gameAcceptMatch.length > 1 && connection.request.method === RequestMethod.Post) {
           let id = parseInt(gameAcceptMatch[1]);
-          for (let game of games){
+          for (let game of games) {
             if (game.id == id) {
               game.state = GameState.active;
               localStorage.setItem('games', JSON.stringify(games));
@@ -415,10 +452,10 @@ export let fakeBackendProvider = {
           connection.mockRespond(new Response(new ResponseOptions({status: 401})))
         }
 
-        let gameDeclineMatch = connection.request.url.match(/\/api\/games\/(\d+)\/decline/);
+        let gameDeclineMatch = connection.request.url.match(/\/api\/games\/(\d+)\/decline$/);
         if (gameDeclineMatch && gameDeclineMatch.length > 1 && connection.request.method === RequestMethod.Post) {
           let id = parseInt(gameDeclineMatch[1]);
-          for (let game of games){
+          for (let game of games) {
             if (game.id == id) {
               game.state = GameState.declined;
               localStorage.setItem('games', JSON.stringify(games));
@@ -429,7 +466,67 @@ export let fakeBackendProvider = {
           }
           connection.mockRespond(new Response(new ResponseOptions({status: 401})))
         }
-          // delete user
+
+        let gameFinishingRequestsMatch = connection.request.url.match(/\/api\/gamefinishingrequests$/);
+        if (gameFinishingRequestsMatch && gameFinishingRequestsMatch.length > 0 && connection.request.method === RequestMethod.Post) {
+          if (authenticatedUser) {
+            let createGameFinishRequestViewModel: CreateGameFinishRequestViewModel = JSON.parse(connection.request.getBody());
+            let gameFinishRequest: GameFinishRequest = {
+              state: GameFinishRequestState.new,
+              gameId: createGameFinishRequestViewModel.gameId,
+              id: gameFinishRequests.length + 1,
+              createdDate: new Date(),
+              createdById: authenticatedUser.id
+            };
+            gameFinishRequests.push(gameFinishRequest);
+            localStorage.setItem('gameFinishRequests', JSON.stringify(gameFinishRequests));
+            // respond 200 OK
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameFinishRequest.id})));
+            return;
+          }
+
+          connection.mockRespond(new Response(new ResponseOptions({status: 401})))
+        }
+
+        let gameFinishingRequestsApprovedMatch = connection.request.url.match(/\/api\/gamefinishingrequests\/(\d+)\/approve$/);
+        if (gameFinishingRequestsApprovedMatch && gameFinishingRequestsApprovedMatch.length > 1 && connection.request.method === RequestMethod.Post) {
+          let id = parseInt(gameFinishingRequestsApprovedMatch[1]);
+          for (let gameFinishRequest of gameFinishRequests) {
+            if (gameFinishRequest.id == id) {
+              gameFinishRequest.state = GameFinishRequestState.approved;
+              localStorage.setItem('gameFinishRequests', JSON.stringify(gameFinishRequests));
+              // set game.state to finished
+              for (let game of games) {
+                if (game.id == gameFinishRequest.gameId) {
+                  game.state = GameState.finished;
+                  localStorage.setItem('games', JSON.stringify(games));
+                  break;
+                }
+              }
+              // respond 200 OK
+              connection.mockRespond(new Response(new ResponseOptions({status: 200})));
+              return;
+            }
+          }
+          connection.mockRespond(new Response(new ResponseOptions({status: 401})))
+        }
+
+        let gameFinishingRequestsDeclinedMatch = connection.request.url.match(/\/api\/gamefinishingrequests\/(\d+)\/decline$/);
+        if (gameFinishingRequestsDeclinedMatch && gameFinishingRequestsDeclinedMatch.length > 1 && connection.request.method === RequestMethod.Post) {
+          let id = parseInt(gameFinishingRequestsDeclinedMatch[1]);
+          for (let gameFinishRequest of gameFinishRequests) {
+            if (gameFinishRequest.id == id) {
+              gameFinishRequest.state = GameFinishRequestState.declined;
+              localStorage.setItem('gameFinishRequests', JSON.stringify(gameFinishRequests));
+              // respond 200 OK
+              connection.mockRespond(new Response(new ResponseOptions({status: 200})));
+              return;
+            }
+          }
+          connection.mockRespond(new Response(new ResponseOptions({status: 401})))
+        }
+
+        // delete user
         if (connection.request.url.match(/\/api\/users\/\d+$/) && connection.request.method === RequestMethod.Delete) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
           let authenticatedUser = getUserFromToken(connection.request.headers.get('Authorization'));

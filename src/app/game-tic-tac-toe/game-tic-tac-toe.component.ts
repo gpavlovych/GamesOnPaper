@@ -13,7 +13,7 @@ import {Sex} from "../sex.enum";
 export class GameTicTacToeComponent implements OnInit {
   @ViewChild("showWinnerModal") public showWinnerModal: ModalDirective;
 
-  game: GameDetails<GameTicTacToeData>;
+  game: GameDetails;
 
   constructor() { }
 
@@ -37,9 +37,11 @@ export class GameTicTacToeComponent implements OnInit {
         userPic: ''
       }],
       state: GameState.active,
-      activePlayer: 0,
+      createdBy: null,
+      createdDate: null,
       winner: null,
       data: {
+        activePlayer: 0,
         rows: [
           [null, null, null],
           [null, null, null],
@@ -58,11 +60,11 @@ export class GameTicTacToeComponent implements OnInit {
       return;
     }
 
-    this.game.data.rows[rowIndex][columnIndex] = this.game.activePlayer;
+    this.game.data.rows[rowIndex][columnIndex] = this.game.data.activePlayer;
     this.game.data.moves--;
 
     if (this.checkWinner(rowIndex, columnIndex)) {
-      this.game.winner = this.game.activePlayer;
+      this.game.winner = this.game.data.activePlayer;
       this.game.state = GameState.finished;
     }
 
@@ -74,7 +76,7 @@ export class GameTicTacToeComponent implements OnInit {
       this.showWinnerModal.show();
     }
 
-    this.game.activePlayer = (this.game.activePlayer + 1)%2;
+    this.game.data.activePlayer = (this.game.data.activePlayer + 1)%2;
   }
 
   private checkWinner(rowIndex:number, columnIndex:number): boolean{

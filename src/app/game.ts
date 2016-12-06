@@ -1,40 +1,37 @@
 import { UserInfo } from "./user";
 import { GameState } from "./game-state.enum";
 import { GameDefinitionInfo } from "./game-definition";
+import { GameFinishRequestInfo } from "./game-finish-request-info";
 
 export interface GameInfo {
   id: any;
   gameDefinition: GameDefinitionInfo;
   state: GameState;
   players: UserInfo[];
-  activePlayer: number;
-  winner: number;
+  createdBy: UserInfo;
+  createdDate: Date;
+  finishRequests: GameFinishRequestInfo[];
+  winner: UserInfo;
 }
 
-export interface GameDetails<T> {
+export interface GameDetails {
   id: any;
   gameDefinition: GameDefinitionInfo;
   state: GameState;
   players: UserInfo[];
-  activePlayer: number;
-  winner: number;
-  data: T;
-}
-
-export interface FinishRequestInfo {
-  id: any;
-  game: GameInfo;
   createdBy: UserInfo;
-  approvals: FinishApprovalInfo[];
+  createdDate: Date;
+  winner: UserInfo;
+  data: any;
 }
 
-export interface FinishApprovalInfo {
-  finishRequestId: any;
-  approvedBy: UserInfo;
-  state: FinishApprovalState;
-}
-
-export enum FinishApprovalState {
-  approved  = 0,
-  rejected = 1
+export interface Game {
+  id: any;
+  gameDefinitionId: any;
+  state: GameState;
+  createdById: any;
+  createdDate: Date;
+  playerIds: any[];
+  winnerId: any;
+  data: any;
 }
