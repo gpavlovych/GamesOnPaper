@@ -1,18 +1,50 @@
-<a>
-  <a [routerLink]="['/game/'+activeGame.id]">
-    <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
-      <app-user-avatar [user]="player"></app-user-avatar>
-      <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
+<table>
+  <tr>
+    <td style="white-space: nowrap; overflow: hidden">
+      Playing with:&nbsp;
+    </td>
+    <template ngFor let-player [ngForOf]="activeGame.players">
+      <template [ngIf]="player.id!=userId">
+        <td>
+          <app-user-avatar [user]="player"></app-user-avatar>
+        </td>
+        <td>
+          <label class="label label-default">{{player.userName}}</label>
+        </td>
+      </template>
     </template>
-  </a>
-  <button *ngIf="!activeFinishRequests[activeGame.id]" type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
-  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id != userId">
-    {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game. Do you agree?
-    <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-ok"></span>Ok</button>
-    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
-  </span>
-  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id == userId">
-    You want to finish the game. Waiting for opponent decision.
-    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
-  </span>
-</a>
+    <td>
+      <a [routerLink]="['/game/'+activeGame.id]" class="btn btn-default">
+        Go to
+      </a>
+    </td>
+    <td *ngIf="!activeFinishRequests[activeGame.id]" >
+      <button type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
+    </td>
+    </tr>
+  </table>
+  <table>
+    <template [ngIf]="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id != userId">
+      <tr>
+        <td style="white-space: nowrap; overflow: hidden">
+          {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game.
+        </td>
+        <td>
+          <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-ok"></span>Accept</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Decline</button>
+        </td>
+      </tr>
+    </template>
+    <template [ngIf]="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id == userId">
+      <tr>
+        <td style="white-space: nowrap; overflow: hidden">
+          You want to finish the game. Waiting for opponent decision.
+        </td>
+        <td>
+          <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+        </td>
+      </tr>
+    </template>
+  </table>

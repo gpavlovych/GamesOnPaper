@@ -1,0 +1,14 @@
+<span class="single-row">
+  <table>
+    <tr>
+      <template ngFor let-player [ngForOf]="finishedGame.players">
+        <td>
+          <app-user-avatar [user]="player"></app-user-avatar>
+        </td>
+        <td>
+          <span class="label" [ngClass]="{'label-success': (player == finishedGame.winner), 'label-default':(player != finishedGame.winner)}">{{player.userName}}</span>
+        </td>
+      </template>
+    </tr>
+  </table>
+</span>

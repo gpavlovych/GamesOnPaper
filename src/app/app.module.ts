@@ -30,6 +30,7 @@ import { UserAvatarComponent } from './user-avatar/user-avatar.component';
 import {RefreshService} from "./refresh.service";
 import { ActiveGameRowComponent } from './active-game-row/active-game-row.component';
 import { NewGameRowComponent } from './new-game-row/new-game-row.component';
+import { FinishGameRowComponent } from './finish-game-row/finish-game-row.component';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -61,7 +62,8 @@ const appRoutes: Routes = [
     KeysPipe,
     UserAvatarComponent,
     ActiveGameRowComponent,
-    NewGameRowComponent
+    NewGameRowComponent,
+    FinishGameRowComponent
   ],
   imports: [
     BrowserModule,

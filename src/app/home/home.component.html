@@ -114,12 +114,7 @@
           <template ngFor let-finishedGame [ngForOf]="finishedGameGrouped.value">
             <tr>
               <td>
-                <template ngFor let-player [ngForOf]="finishedGame.players" let-i="index">
-                  <app-user-avatar [user]="player"></app-user-avatar>
-                  <label class="label" [ngClass]="{'label-default': finishedGame.winner==null, 'label-success': finishedGame.winner==i, 'label-danger': finishedGame.winner!=null && finishedGame.winner!=i}">
-                    {{player.userName}}
-                  </label>
-                </template>
+                <app-finish-game-row [finishedGame]="finishedGame"></app-finish-game-row>
               </td>
             </tr>
           </template>

@@ -1,12 +1,12 @@
 <nav class="navbar navbar-default navbar-static-top">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">Games on paper</a>
+      <a class="navbar-brand" [routerLink]="['/']">Games on paper</a>
     </div>
     <template [ngIf]="user!=null">
       <ul class="nav navbar-nav">
         <li dropdown>
-          <a href="#" class="dropdown-toggle" dropdownToggle>Create game</a>
+          <a class="dropdown-toggle" dropdownToggle>Create game</a>
           <ul class="dropdown-menu" dropdownMenu>
             <li class="dropdown-header">Invite user to play</li>
             <li *ngFor="let gameToBeCreated of gamesToBeCreated">
@@ -14,11 +14,11 @@
                 <span><img class="img-circle" width="24" height="24" src="{{gameToBeCreated.icon}}"/></span> {{gameToBeCreated.name}}
               </a>
             </li>
-            <li *ngIf="gamesToBeCreatedTotalCount>gamesToBeCreatedTop"><a href="#">Show more</a></li>
+            <li *ngIf="gamesToBeCreatedTotalCount>gamesToBeCreatedTop"><a [routerLink]="['/']">Show more</a></li>
           </ul>
         </li>
         <li dropdown>
-          <a href="#" class="dropdown-toggle" dropdownToggle>Invitations: <span class="glyphicon glyphicon-arrow-down"></span><span class="badge">{{incomingInvitationsTotalCount}}</span> <span class="glyphicon glyphicon-arrow-up"></span><span class="badge">{{outgoingInvitationsTotalCount}}</span></a>
+          <a class="dropdown-toggle" dropdownToggle>Invitations: <span class="glyphicon glyphicon-arrow-down"></span><span class="badge">{{incomingInvitationsTotalCount}}</span> <span class="glyphicon glyphicon-arrow-up"></span><span class="badge">{{outgoingInvitationsTotalCount}}</span></a>
           <ul class="dropdown-menu" dropdownMenu>
             <li class="dropdown-header">Incoming invitations</li>
             <template ngFor let-incomingInvitation [ngForOf]="incomingInvitations">
@@ -34,38 +34,33 @@
                 <app-new-game-row [newGame]="outgoingInvitation"></app-new-game-row>
               </li>
             </template>
-            <li *ngIf="outgoingInvitationsTotalCount>outgoingInvitationsTop"><a href="#">Show more</a></li>
+            <li *ngIf="outgoingInvitationsTotalCount>outgoingInvitationsTop"><a [routerLink]="['/']">Show more</a></li>
           </ul>
         </li>
         <li dropdown>
-          <a href="#" class="dropdown-toggle" dropdownToggle>Active Games <span class="badge">{{activeGamesTotalCount}}</span></a>
+          <a class="dropdown-toggle" dropdownToggle>Active Games <span class="badge">{{activeGamesTotalCount}}</span></a>
           <ul class="dropdown-menu" dropdownMenu>
             <template ngFor let-game [ngForOf]="activeGames | groupBy: 'gameDefinition.name'">
               <li class="dropdown-header">{{game.key}}</li>
               <li *ngFor="let activeGame of game.value">
                 <app-active-game-row [activeGame]="activeGame" [activeFinishRequests]="activeFinishRequests"></app-active-game-row>
               </li>
-              <li *ngIf="activeGamesTotalCount>10"><a href="#">Show more</a></li>
+              <li *ngIf="activeGamesTotalCount>10"><a [routerLink]="['/']">Show more</a></li>
               <li class="divider"></li>
             </template>
           </ul>
         </li>
         <li dropdown>
-          <a href="#" class="dropdown-toggle" dropdownToggle>Finished Games <span class="badge">{{finishedGamesTotalCount}}</span></a>
+          <a class="dropdown-toggle" dropdownToggle>Finished Games <span class="badge">{{finishedGamesTotalCount}}</span></a>
           <ul class="dropdown-menu" dropdownMenu>
             <template ngFor let-game [ngForOf]="finishedGames | groupBy: 'gameDefinition.name'">
               <li class="dropdown-header">{{game.key}}</li>
               <li *ngFor="let finishedGame of game.value">
-                <a>
-                  <template ngFor let-gamePlayer [ngForOf]="finishedGame.players" let-gamePlayerIndex="index">
-                    <app-user-avatar [user]="finishedGame.players[0]"></app-user-avatar>
-                    <span class="label" [ngClass]="{'label-success': (gamePlayerIndex == finishedGame.winner), 'label-default':(gamePlayerIndex != finishedGame.winner)}">{{gamePlayer.userName}}</span>
-                  </template>
-                </a>
+                <app-finish-game-row [finishedGame]="finishedGame"></app-finish-game-row>
               </li>
               <li class="divider"></li>
             </template>
-            <li *ngIf="finishedGamesTotalCount>10"><a href="#">Show more</a></li>
+            <li *ngIf="finishedGamesTotalCount>10"><a [routerLink]="['/']">Show more</a></li>
           </ul>
         </li>
       </ul>
