@@ -28,6 +28,8 @@ import {ConfirmationService} from "./confirmation.service";
 import { KeysPipe } from './keys.pipe';
 import { UserAvatarComponent } from './user-avatar/user-avatar.component';
 import {RefreshService} from "./refresh.service";
+import { ActiveGameRowComponent } from './active-game-row/active-game-row.component';
+import { NewGameRowComponent } from './new-game-row/new-game-row.component';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -57,7 +59,9 @@ const appRoutes: Routes = [
     CreateGameComponent,
     ConfirmationComponent,
     KeysPipe,
-    UserAvatarComponent
+    UserAvatarComponent,
+    ActiveGameRowComponent,
+    NewGameRowComponent
   ],
   imports: [
     BrowserModule,

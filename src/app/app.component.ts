@@ -93,50 +93,6 @@ export class AppComponent implements OnInit {
     };
   }
 
-  getUserName(user: UserInfo) {
-    if (this.authenticationService.getAuthorizedUserId() == user.id){
-      return "yourself";
-    }
-    else {
-      return user.userName;
-    }
-  }
-
-  accept(game: GameInfo) {
-    this.gameService.accept(game.id).subscribe(() => {
-      this.alertService.successWithLink("You've just accepted the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
-      this.refreshService.refresh();
-    });
-  }
-
-  decline(game: GameInfo) {
-    this.gameService.decline(game.id).subscribe(() => {
-      this.alertService.successWithLink("You've just declined the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
-      this.refreshService.refresh();
-    });
-  }
-
-  finish(game: GameInfo) {
-    this.gameService.requestFinish({gameId: game.id}).subscribe(()=>{
-      this.alertService.success("You've just requested the game finish");
-      this.refreshService.refresh();
-    });
-  }
-
-  finishApprove(gameFinishRequestId: any) {
-    this.gameService.requestFinishApprove(gameFinishRequestId).subscribe(()=>{
-      this.alertService.success("You've just approved the game finish request");
-      this.refreshService.refresh();
-    });
-  }
-
-  finishDecline(gameFinishRequestId: any) {
-    this.gameService.requestFinishDecline(gameFinishRequestId).subscribe(()=>{
-      this.alertService.success("You've just declined the game finish request");
-      this.refreshService.refresh();
-    });
-  }
-
   private getActiveFinishRequest(game: GameInfo){
     for (let gameRequest of game.finishRequests){
       if (gameRequest.state == GameFinishRequestState.new){

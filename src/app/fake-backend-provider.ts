@@ -29,6 +29,18 @@ export let fakeBackendProvider = {
         let gameFinishRequests: GameFinishRequest[] = JSON.parse(localStorage.getItem('gameFinishRequests')) || [];
         console.log("url:"+connection.request.url);
 
+        function hasSameItems(values: any[]): boolean {
+          if (values && values.length > 0) {
+            let firstItem = values[0];
+            for (let index = 1; index < values.length; index++) {
+              if (values[index] != firstItem) {
+                return false;
+              }
+            }
+          }
+          return true;
+        }
+
         function getUserFromToken(token: string) {
           if (token) {
             let tokenMatch = token.match(/^Bearer fake_user_token:(.*)$/);
@@ -194,6 +206,7 @@ export let fakeBackendProvider = {
                 if (gameInfo.state == GameState.finished) {
                   finished.push(gameInfo);
                 }
+                break;
               }
             }
           }
@@ -391,7 +404,7 @@ export let fakeBackendProvider = {
               playerIds: newGameCreateVm.playerIds,
               winnerId: null,
               gameDefinitionId: newGameCreateVm.gameDefinitionId,
-              state: GameState.new
+              state: hasSameItems(newGameCreateVm.playerIds)?GameState.active:GameState.new
             };
 
             // save new game
@@ -471,18 +484,27 @@ export let fakeBackendProvider = {
         if (gameFinishingRequestsMatch && gameFinishingRequestsMatch.length > 0 && connection.request.method === RequestMethod.Post) {
           if (authenticatedUser) {
             let createGameFinishRequestViewModel: CreateGameFinishRequestViewModel = JSON.parse(connection.request.getBody());
-            let gameFinishRequest: GameFinishRequest = {
-              state: GameFinishRequestState.new,
-              gameId: createGameFinishRequestViewModel.gameId,
-              id: gameFinishRequests.length + 1,
-              createdDate: new Date(),
-              createdById: authenticatedUser.id
-            };
-            gameFinishRequests.push(gameFinishRequest);
-            localStorage.setItem('gameFinishRequests', JSON.stringify(gameFinishRequests));
-            // respond 200 OK
-            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameFinishRequest.id})));
-            return;
+            for (let game of games) {
+              if (game.id == createGameFinishRequestViewModel.gameId) {
+                let state: GameFinishRequestState = hasSameItems(game.playerIds) ? GameFinishRequestState.approved : GameFinishRequestState.new;
+                let gameFinishRequest: GameFinishRequest = {
+                  state: state,
+                  gameId: game.id,
+                  id: gameFinishRequests.length + 1,
+                  createdDate: new Date(),
+                  createdById: authenticatedUser.id
+                };
+                gameFinishRequests.push(gameFinishRequest);
+                localStorage.setItem('gameFinishRequests', JSON.stringify(gameFinishRequests));
+                if (state == GameFinishRequestState.approved){
+                  game.state = GameState.finished;
+                  localStorage.setItem('games', JSON.stringify(games));
+                }
+                // respond 200 OK
+                connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameFinishRequest.id})));
+                return;
+              }
+            }
           }
 
           connection.mockRespond(new Response(new ResponseOptions({status: 401})))

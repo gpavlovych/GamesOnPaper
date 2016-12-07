@@ -8,6 +8,7 @@ import { UserService } from "../user.service";
 import {RefreshService} from "../refresh.service";
 import {AlertService} from "../alert.service";
 import {GameFinishRequestState} from "../game-finish-request-state.enum";
+import {ConfirmationService} from "../confirmation.service";
 
 @Component({
   selector: 'app-home',
@@ -16,6 +17,7 @@ import {GameFinishRequestState} from "../game-finish-request-state.enum";
 })
 export class HomeComponent implements OnInit {
   constructor(private authenticationService: AuthenticationService,
+              private confirmationService: ConfirmationService,
               private gameService: GameService,
               private userService: UserService,
               private refreshService: RefreshService,
@@ -248,51 +250,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  getUserName(user: UserInfo) {
-    if (this.authenticationService.getAuthorizedUserId() == user.id){
-      return "yourself";
-    }
-    else {
-      return user.userName;
-    }
-  }
-
-  accept(game: GameInfo) {
-    this.gameService.accept(game.id).subscribe(() => {
-      this.alertService.successWithLink("You've just accepted the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
-      this.refreshService.refresh();
-    });
-  }
-
-  decline(game: GameInfo) {
-    this.gameService.decline(game.id).subscribe(() => {
-      this.alertService.successWithLink("You've just declined the game invitation from "+this.getUserName(game.players[0]), "/game/"+game.id, "Go to game");
-      this.refreshService.refresh();
-    });
-  }
-
-  finish(game: GameInfo) {
-    this.gameService.requestFinish({gameId: game.id}).subscribe(()=>{
-      this.alertService.success("You've just requested the game finish");
-      this.refreshService.refresh();
-    });
-  }
-
-  finishApprove(gameFinishRequestId: any) {
-    this.gameService.requestFinishApprove(gameFinishRequestId).subscribe(()=>{
-      this.alertService.success("You've just approved the game finish request");
-      this.refreshService.refresh();
-    });
-  }
-
-  finishDecline(gameFinishRequestId: any) {
-    this.gameService.requestFinishDecline(gameFinishRequestId).subscribe(()=>{
-      this.alertService.success("You've just declined the game finish request");
-      this.refreshService.refresh();
-    });
-  }
-
-  private getActiveFinishRequest(game: GameInfo){
+  private static getActiveFinishRequest(game: GameInfo){
     for (let gameRequest of game.finishRequests){
       if (gameRequest.state == GameFinishRequestState.new){
         return gameRequest;
@@ -303,7 +261,7 @@ export class HomeComponent implements OnInit {
 
   private refreshActiveGameFinishedRequests() {
     for (let activeGame of this.activeGames) {
-      let activeGameFinishRequest = this.getActiveFinishRequest(activeGame);
+      let activeGameFinishRequest = HomeComponent.getActiveFinishRequest(activeGame);
       if (activeGameFinishRequest) {
         this.activeFinishRequests[activeGame.id] = activeGameFinishRequest;
       }

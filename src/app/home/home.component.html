@@ -28,20 +28,11 @@
     <div class="panel-body">
       <h4>Invitations you've received</h4>
       <table class="table">
-        <template ngFor let-incomingInvitation [ngForOf]="incomingInvitations">
-          <tr>
-            <td>
-              <app-user-avatar [user]="incomingInvitation.players[0]"></app-user-avatar>
-              {{incomingInvitation.players[0].userName}} invited you to play {{incomingInvitation.gameDefinition.name}}!
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <button type="button" class="btn btn-default" (click)="accept(incomingInvitation)">Accept</button>
-              <button type="button" class="btn btn-default" (click)="decline(incomingInvitation)">Decline</button>
-            </td>
-          </tr>
-        </template>
+        <tr *ngFor="let incomingInvitation of incomingInvitations">
+          <td>
+            <app-new-game-row [newGame]="incomingInvitation"></app-new-game-row>
+          </td>
+        </tr>
       </table>
     </div>
     <div class="panel-footer">
@@ -61,21 +52,11 @@
     <div class="panel-body">
       <h4>Invitations you've sent</h4>
       <table class="table">
-        <template ngFor let-outgoingInvitation [ngForOf]="outgoingInvitations">
-          <template ngFor let-outgoingInvitationUser [ngForOf]="outgoingInvitation.players" let-i="index">
-            <tr *ngIf="i!=outgoingInvitation.activePlayer">
-              <td>
-                <app-user-avatar [user]="outgoingInvitation.players[0]"></app-user-avatar>
-                {{outgoingInvitationUser.userName}} invited to play {{outgoingInvitation.gameDefinition.Name}} with you!
-              </td>
-            </tr>
-            <tr *ngIf="i!=outgoingInvitation.activePlayer">
-              <td>
-                <button type="button" class="btn btn-default" (click)="decline(outgoingInvitation)">Decline</button>
-              </td>
-            </tr>
-          </template>
-        </template>
+        <tr *ngFor="let outgoingInvitation of outgoingInvitations">
+          <td>
+            <app-new-game-row [newGame]="outgoingInvitation"></app-new-game-row>
+          </td>
+        </tr>
       </table>
     </div>
     <div class="panel-footer">
@@ -102,24 +83,7 @@
           <template ngFor let-activeGame [ngForOf]="activeGameGrouped.value">
             <tr>
               <td>
-                <a>
-                  <a [routerLink]="['/game/'+activeGame.id]">
-                    <template ngFor let-player [ngForOf]="activeGame.players" let-i="index">
-                      <app-user-avatar [user]="player"></app-user-avatar>
-                      <label class="label" [ngClass]="{'label-default': activeGame.winner==null, 'label-success': activeGame.winner==i, 'label-danger': activeGame.winner!=null && activeGame.winner!=i}">{{player.userName}}</label>
-                    </template>
-                  </a>
-                  <button *ngIf="!activeFinishRequests[activeGame.id]" type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
-                  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id != user.id">
-                    {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game. Do you agree?
-                    <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-ok"></span>Ok</button>
-                    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
-                  </span>
-                  <span *ngIf="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id == user.id">
-                    You want to finish the game. Waiting for opponent decision.
-                    <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id].id)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
-                  </span>
-                </a>
+                <app-active-game-row [activeFinishRequests]="activeFinishRequests" [activeGame]="activeGame"></app-active-game-row>
               </td>
             </tr>
           </template>

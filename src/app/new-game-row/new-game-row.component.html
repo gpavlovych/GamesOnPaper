@@ -1,0 +1,31 @@
+<div *ngIf="newGame.players[0].id!=currentUserId">
+  <table>
+    <tr>
+      <td>
+        <app-user-avatar [user]="newGame.players[0]"></app-user-avatar>
+        {{newGame.players[0].userName}} invited you to play {{newGame.gameDefinition.name}}!
+      </td>
+    </tr>
+    <tr>
+      <button type="button" class="btn btn-default" (click)="accept(newGame)">Accept</button>
+      <button type="button" class="btn btn-default" (click)="decline(newGame)">Decline</button>
+    </tr>
+  </table>
+</div>
+<div *ngIf="newGame.players[0].id==currentUserId">
+  <table>
+    <template ngFor let-player [ngForOf]="newGame.players" let-i="index">
+      <tr *ngIf="i!=0">
+        <td>
+          <app-user-avatar [user]="player"></app-user-avatar>
+          {{player.userName}} invited to play {{newGame.gameDefinition.Name}} with you!
+        </td>
+      </tr>
+    </template>
+    <tr>
+      <td>
+        <button type="button" class="btn btn-default" (click)="decline(newGame)">Decline</button>
+      </td>
+    </tr>
+  </table>
+</div>
