@@ -11,8 +11,18 @@
       <div class="panel-body">
         <h4>Users</h4>
         <table class="table">
+          <colgroup>
+            <col width="50px"/>
+            <col width="50%"/>
+            <col width="50%"/>
+          </colgroup>
           <tr *ngFor="let user of users">
-            <td><app-user-avatar [user]="user"></app-user-avatar>{{user.username}}</td>
+            <td>
+              <div style="width: 50px; height: 50px;">
+                <app-user-avatar [user]="user"></app-user-avatar>
+              </div>
+            </td>
+            <td>{{user.username}}</td>
             <td><button (click)="inviteUser(user)">Invite</button></td>
           </tr>
         </table>

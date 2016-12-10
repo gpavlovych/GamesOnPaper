@@ -31,12 +31,11 @@ export class RegisterComponent implements OnInit {
     };
   }
 
-  onSubmit(){
+  onSubmit() {
     this.loading = true;
     this.userService
       .create(this.user)
-      .subscribe(
-        data => {
+      .subscribe(() => {
           // set success message and pass true paramater to persist the message after redirecting to the login page
           this.alertService.success('Registration successful', true);
           this.router.navigate(['/login']);

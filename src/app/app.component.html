@@ -3,7 +3,7 @@
     <div class="navbar-header">
       <a class="navbar-brand" [routerLink]="['/']">Games on paper</a>
     </div>
-    <template [ngIf]="user!=null">
+    <template [ngIf]="currentUser!=null">
       <ul class="nav navbar-nav">
         <li dropdown>
           <a class="dropdown-toggle" dropdownToggle>Create game</a>
@@ -65,8 +65,8 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a class="navbar-brand"><strong><span><app-user-avatar [user]="getUserInfo(user)"></app-user-avatar></span> {{user.userName}}</strong></a></li>
-        <li><a [routerLink]="['/login']" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span> Logout</strong></a></li>
+        <li><a class="navbar-brand"><strong><span><app-user-avatar [userDetails]="currentUser"></app-user-avatar></span>Welcome, {{currentUser.username}}</strong></a></li>
+        <li><a [routerLink]="['/login']" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span>Logout</strong></a></li>
       </ul>
     </template>
   </div>

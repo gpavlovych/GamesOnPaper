@@ -23,8 +23,8 @@ export class ConfirmationComponent implements OnInit {
     this.childModal.show();
   }
 
-  hide(canceled: boolean):void {
-    this.resolve(canceled);
+  hide(isOk: boolean):void {
+    this.resolve(isOk);
     this.childModal.hide();
   }
 

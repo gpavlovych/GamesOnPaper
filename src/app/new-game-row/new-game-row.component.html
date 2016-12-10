@@ -1,37 +1,43 @@
-<table *ngIf="newGame.players[0].id!=currentUserId">
-  <tr>
-    <td>
-      <app-user-avatar [user]="newGame.players[0]"></app-user-avatar>
-    </td>
-    <td>
-      <span class="label label-default">{{newGame.players[0].userName}}</span>
-    </td>
-    <td style="white-space: nowrap;overflow: hidden">
-      invited you to play {{newGame.gameDefinition.name}}!
-    </td>
-    <td>
-      <button type="button" class="btn btn-default" (click)="accept(newGame)"><span class="glyphicon glyphicon-ok"></span>Accept</button>
-    </td>
-    <td>
-      <button type="button" class="btn btn-default" (click)="decline(newGame)"><span class="glyphicon glyphicon-remove"></span>Decline</button>
-    </td>
-  </tr>
-</table>
-<table *ngIf="newGame.players[0].id==currentUserId">
-  <tr>
-    <template ngFor let-player [ngForOf]="newGame.players" let-i="index">
-      <template [ngIf]="i!=0">
+<template [ngIf]="newGame != null && currentUser != null">
+  <table *ngIf="newGame.players[0].id != currentUser.id">
+    <tr>
       <td>
-        <app-user-avatar [user]="player"></app-user-avatar>
+        <div style="width: 50px; height: 50px;">
+          <app-user-avatar [user]="newGame.players[0]"></app-user-avatar>
+        </div>
       </td>
       <td>
-        <span class="label label-default">{{player.userName}}</span>
+        <span class="label label-default">{{newGame.players[0].userName}}</span>
       </td>
+      <td style="white-space: nowrap;overflow: hidden">
+        invited you to play {{newGame.gameDefinition.name}}!
+      </td>
+      <td>
+        <button type="button" class="btn btn-default" (click)="accept(newGame)"><span class="glyphicon glyphicon-ok"></span>Accept</button>
+      </td>
+      <td>
+        <button type="button" class="btn btn-default" (click)="decline(newGame)"><span class="glyphicon glyphicon-remove"></span>Decline</button>
+      </td>
+    </tr>
+  </table>
+  <table *ngIf="newGame.players[0].id == currentUser.id">
+    <tr>
+      <template ngFor let-player [ngForOf]="newGame.players" let-i="index">
+        <template [ngIf]="i!=0">
+          <td>
+            <div style="width: 50px; height: 50px;">
+              <app-user-avatar [user]="player"></app-user-avatar>
+            </div>
+          </td>
+          <td>
+            <span class="label label-default">{{player.userName}}</span>
+          </td>
+        </template>
       </template>
-    </template>
       <td style="white-space: nowrap;overflow: hidden"> invited to play {{newGame.gameDefinition.name}} with you!</td>
       <td>
         <button type="button" class="btn btn-default" (click)="decline(newGame)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
       </td>
     </tr>
-</table>
+  </table>
+</template>

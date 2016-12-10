@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {UserInfo} from "../user";
+import {UserInfo, UserDetails} from "../user";
 import {GameDefinitionDetails} from "../game-definition";
 import {GameService} from "../game.service";
 import {ActivatedRoute} from "@angular/router";
@@ -11,6 +11,7 @@ import {ConfirmationService} from "../confirmation.service";
 import {CreateGameViewModel} from "../view-models/create-game-view-model";
 import {AuthenticationService} from "../authentication.service";
 import {RefreshService} from "../refresh.service";
+import {UserInfoService} from "../user-info.service";
 
 @Component({
   selector: 'app-create-game',
@@ -20,30 +21,29 @@ import {RefreshService} from "../refresh.service";
 export class CreateGameComponent implements OnInit {
 
   private sub: any;
-  constructor(
-    private gameService: GameService,
-    private userService: UserService,
-    private alertService: AlertService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-    private authenticationService: AuthenticationService,
-    private refreshService: RefreshService) {
-    this.gameDefinition = null;
-    this.users = [];
-    this._usersCurrentPage = 1;
-    this.usersTop = 10;
-    this.usersTotalCount = 0;
+
+  private currentUser: UserDetails = null;
+
+  users: UserInfo[] = [];
+  usersTop: number = 10;
+  usersTotalCount: number = 0;
+  gameDefinition: GameDefinitionDetails = null;
+  gameDefinitionId: any = null;
+
+  constructor(private gameService: GameService,
+              private userService: UserService,
+              private alertService: AlertService,
+              private route: ActivatedRoute,
+              private confirmationService: ConfirmationService,
+              private refreshService: RefreshService,
+              private userInfoService: UserInfoService) {
   }
 
   // Load data ones componet is ready
   ngOnInit() {
     // Subscribe to route params
     this.sub = this.route.params.subscribe(params => {
-
-      let id = params['id'];
-
-      this.gameService.getGameDefinitionDetails(id).subscribe(data => this.gameDefinition = data);
-
+      this.gameDefinitionId = params['id'];
       this.refresh();
       this.refreshService.getRefresher().subscribe(() => this.refresh());
     });
@@ -55,8 +55,33 @@ export class CreateGameComponent implements OnInit {
   }
 
   private refresh() {
-    this.refreshGameToBeCreated();
-    this.refreshGameToBeCreatedTotalCount();
+    this.refreshCurrentUser();
+    this.refreshGameDefinition();
+    this.usersCurrentPage = 1;
+  }
+
+  private refreshGameDefinition() {
+    this.gameDefinition = null;
+    this.gameService.getGameDefinitionDetails(this.gameDefinitionId).subscribe(data => this.gameDefinition = data);
+  }
+
+  private refreshCurrentUser() {
+    this.currentUser = null;
+    this.userInfoService.getCurrentUser().subscribe(data => this.currentUser = data);
+  }
+
+  private refreshUsers() {
+    this.users = [];
+    this.userService.getAll(this.usersTop * (this._usersCurrentPage - 1), this.usersTop).subscribe(data => {
+      if (data) {
+        this.users = data
+      }
+    });
+  }
+
+  private refreshUsersTotalCount() {
+    this.usersTotalCount = 0;
+    this.userService.getAllCount().subscribe(data => this.usersTotalCount = data);
   }
 
   private _usersCurrentPage: number;
@@ -67,45 +92,40 @@ export class CreateGameComponent implements OnInit {
 
   set usersCurrentPage(value: number) {
     this._usersCurrentPage = value;
-    this.refreshGameToBeCreated();
-    this.refreshGameToBeCreatedTotalCount();
+    this.refreshUsersTotalCount();
+    this.refreshUsers();
   }
 
-  users: UserInfo[];
-  usersTop: number = 5;
-  usersTotalCount: number;
-
-  private refreshGameToBeCreated() {
-    this.userService.getAll(this.usersTop * (this.usersCurrentPage - 1), this.usersTop).subscribe(
-      data => {
-        this.users = data;
-      }
-    );
-  }
-
-  private refreshGameToBeCreatedTotalCount() {
-    this.userService.getAllCount().subscribe(
-      data => {
-        this.usersTotalCount = data;
-      }
-    );
-  }
   inviteUser(user: UserInfo) {
-    let currentUserId = this.authenticationService.getAuthorizedUserId();
-    this.confirmationService.confirm("Do you "+currentUserId+" really want to play with user " + user.id + "?", "Invite user").then(result => {
-      if (result) {
-        this.gameService.create(<CreateGameViewModel>{
-          playerIds: [
-            currentUserId,
-            user.id
-          ],
-          gameDefinitionId: this.gameDefinition.id
-        }).subscribe(gameId => {
-          this.alertService.success("You've just invited user " + user.userName+"; game with id "+gameId+" is created "); //TODO: message
-          this.refreshService.refresh();
-        });
+    if (this.currentUser != null) {
+      let isOtherUser = user.id != this.currentUser.id;
+      let confirmationMessage: string;
+      if (isOtherUser) {
+        confirmationMessage = "Do you really want to play with user " + user.userName + "?";
       }
-    });
+      else {
+        confirmationMessage = "Do you really want to play with yourself?"
+      }
+
+      this.confirmationService.confirm(confirmationMessage, "Invite user").then(isOk => {
+        if (isOk) {
+          this.gameService.create(<CreateGameViewModel>{
+            playerIds: [user.id],
+            gameDefinitionId: this.gameDefinition.id
+          }).subscribe(gameId => {
+            let alertMessage: string;
+            if (isOtherUser) {
+              alertMessage = "You've just invited user " + user.userName + " to play the " + this.gameDefinition.name + "!";
+            }
+            else {
+              alertMessage = "You've just started playing the " + this.gameDefinition.name + " with yourself";
+            }
+
+            this.alertService.successWithLink(alertMessage, "/game/" + gameId, "Go to game");
+            this.refreshService.refresh();
+          });
+        }
+      });
+    }
   }
-gameDefinition: GameDefinitionDetails;
 }
