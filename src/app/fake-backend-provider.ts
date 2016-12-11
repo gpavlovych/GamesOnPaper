@@ -1,6 +1,6 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
-import {GameDefinitionInfo, GameDefinitionDetails} from "./game-definition";
+import {GameDefinitionInfo, GameDefinitionDetails, GameDefinition} from "./game-definition";
 import {GameInfo, Game, GameDetails} from "./game";
 import {GameState} from "./game-state.enum";
 import {UserInfo, UserDetails, User} from "./user";
@@ -27,7 +27,16 @@ export let fakeBackendProvider = {
       // wrap in timeout to simulate server api call
       setTimeout(() => {
         let users: User[] = JSON.parse(localStorage.getItem('users')) || [];
-        let games: Game[] = JSON.parse(localStorage.getItem('games')) || [];
+        let gameDefinitions: GameDefinition[] = [{
+          id: 1,
+          name: "tic-tac-toe",
+          icon: ""
+        }, {
+          id: 2,
+          name: "dots",
+          icon: ""
+        }];
+          let games: Game[] = JSON.parse(localStorage.getItem('games')) || [];
         let gameFinishRequests: GameFinishRequest[] = JSON.parse(localStorage.getItem('gameFinishRequests')) || [];
         console.log("url:"+connection.request.url);
 
@@ -103,7 +112,28 @@ export let fakeBackendProvider = {
           return result;
         }
 
-        function getGameById(id: any): Game{
+        function getGameDefinitionById(id: any): GameDefinition {
+          for (let gameDefinition of gameDefinitions){
+            if (gameDefinition.id == id){
+              return gameDefinition;
+            }
+          }
+          return null;
+        }
+
+        function getGameDefinitionDetailsById(id: any): GameDefinitionDetails {
+          let gameDefinition = getGameDefinitionById(id);
+          if (gameDefinition != null) {
+            return {
+              id: gameDefinition.id,
+              name: gameDefinition.name,
+              icon: gameDefinition.icon
+            };
+          }
+          return null;
+        }
+
+        function getGameById(id: any): Game {
           for (let game of games){
             if (game.id == id){
               return game;
@@ -170,18 +200,14 @@ export let fakeBackendProvider = {
           return result;
         }
 
-        let gameDefinitionInfos: GameDefinitionInfo[] = [
-          {
-            id: 1,
-            name: 'tic-tac-toe',
-            icon: ''
-          },
-          {
-            id: 2,
-            name: 'dots',
-            icon: ''
-          }
-        ];
+        let gameDefinitionInfos: GameDefinitionInfo[] = [];
+        for (let gameDefinition of gameDefinitions) {
+          gameDefinitionInfos.push({
+            id: gameDefinition.id,
+            name: gameDefinition.name,
+            icon: gameDefinition.icon
+          });
+        }
 
         let userInfos: UserInfo[] = [];
         for (let user of users) {
@@ -199,15 +225,13 @@ export let fakeBackendProvider = {
 
         let gameInfos: GameInfo[] = [];
         for (let game of games) {
-          let gameDefinitionInfo: GameDefinitionInfo = gameDefinitionInfosDictionary[game.gameDefinitionId];
-
           let players: UserInfo[] = [];
           for (let playerId of game.playerIds) {
             players.push(userInfosDictionary[playerId]);
           }
 
           let gameInfo: GameInfo = {
-            gameDefinition: gameDefinitionInfo,
+            gameDefinition: gameDefinitionInfosDictionary[game.gameDefinitionId],
             players: players,
             state: game.state,
             id: game.id,
@@ -462,14 +486,15 @@ export let fakeBackendProvider = {
         }
 
         // get game definition by id
-        if (connection.request.url.match(/\/api\/gamedefinitions\/\d+$/) && connection.request.method === RequestMethod.Get) {
+        let gameDefinitionDetailsMatch = connection.request.url.match(/\/api\/gamedefinitions\/(\d+)$/);
+        if (gameDefinitionDetailsMatch && gameDefinitionDetailsMatch.length > 1 && connection.request.method === RequestMethod.Get) {
+          let gameDefinitionDetailsId = parseInt(gameDefinitionDetailsMatch[1]);
+
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
           if (authenticatedUser) {
-            // find user by id in users array
-            let urlParts = connection.request.url.split('/');
-            let id = parseInt(urlParts[urlParts.length - 1]);
 
-            let gameDefinition: GameDefinitionDetails = {id: id, icon: "", name: "tic tac toe"};
+            // find user by id in users array
+            let gameDefinition: GameDefinitionDetails = getGameDefinitionDetailsById(gameDefinitionDetailsId);
 
             // respond 200 OK with user
             connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameDefinition})));

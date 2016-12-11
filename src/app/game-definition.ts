@@ -1,3 +1,8 @@
+export interface GameDefinition {
+  id: any;
+  name: string;
+  icon: any;//TODO: which kind of type best matches
+}
 export interface GameDefinitionInfo {
   id: any;
   name: string;

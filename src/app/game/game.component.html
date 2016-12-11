@@ -1,3 +1,6 @@
-<div class="row" >
-  <app-game-tic-tac-toe [game]="game"></app-game-tic-tac-toe>
-</div>
+<template [ngIf]="game != null">
+  <div class="row" [ngSwitch]="game.gameDefinition.id">
+    <app-game-tic-tac-toe [game]="game" *ngSwitchCase="1"></app-game-tic-tac-toe>
+    <app-game-dots [game]="game" *ngSwitchCase="2"></app-game-dots>
+  </div>
+</template>
