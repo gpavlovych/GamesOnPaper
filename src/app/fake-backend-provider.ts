@@ -128,7 +128,7 @@ export let fakeBackendProvider = {
               createdDate: game.createdDate,
               players: players,
               state: game.state,
-              winner: null
+              winner: userInfosDictionary[game.winnerId]
             };
           }
 
@@ -211,10 +211,10 @@ export let fakeBackendProvider = {
             players: players,
             state: game.state,
             id: game.id,
-            createdBy: userInfos[game.createdById],
+            createdBy: userInfosDictionary[game.createdById],
             createdDate: game.createdDate,
             finishRequests: [],
-            winner: userInfos[game.winnerId]
+            winner: userInfosDictionary[game.winnerId]
           };
 
           gameInfos.push(gameInfo);
@@ -409,9 +409,11 @@ export let fakeBackendProvider = {
           let take = parseInt(finishedMatch[2]);
           // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
           if (authenticatedUser) {
+            let result: GameInfo[]=finished.slice(skip, take + skip);
+            console.log(JSON.stringify(result));
             connection.mockRespond(new Response(new ResponseOptions({
               status: 200,
-              body: finished.slice(skip, take + skip)
+              body: result
             })));
           } else {
             // return 401 not authorised if token is null or invalid

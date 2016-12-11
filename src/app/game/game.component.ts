@@ -5,6 +5,9 @@ import {UserInfoService} from "../user-info.service";
 import {GameDetails} from "../game";
 import {GameService} from "../game.service";
 import {ActivatedRoute} from "@angular/router";
+import {GameTicTacToeComponent} from "../game-tic-tac-toe/game-tic-tac-toe.component";
+import {AlertService} from "../alert.service";
+import {GameState} from "../game-state.enum";
 
 @Component({
   selector: 'app-game',
@@ -21,7 +24,8 @@ export class GameComponent implements OnInit {
   constructor(private refreshService: RefreshService,
               private userInfoService: UserInfoService,
               private route: ActivatedRoute,
-              private gameService: GameService) {
+              private gameService: GameService,
+              private alertService: AlertService) {
   }
 
   ngOnInit() {
@@ -49,7 +53,24 @@ export class GameComponent implements OnInit {
 
   private refreshGame() {
     this.gameService.getById(this.gameId).subscribe(data => {
-      this.game = data
+      this.congratulateOnceIfNeeded(data, this.game);
+      this.game = data;
     });
+  }
+
+  private congratulateOnceIfNeeded(newGame: GameDetails, oldGame: GameDetails) {
+    if ((newGame != null && newGame.state == GameState.finished) && (oldGame != null && oldGame.state == GameState.active)) {
+      if (newGame.winner != null) {
+        if (newGame.winner.id == this.currentUser.id) {
+          this.alertService.success("Congratulations! You've just won the game!");
+        }
+        else {
+          this.alertService.success("Uh-oh! You've just lose the game...");
+        }
+      }
+      else {
+        this.alertService.success("Draw!")
+      }
+    }
   }
 }

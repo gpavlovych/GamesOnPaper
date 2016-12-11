@@ -8,7 +8,7 @@
           </div>
         </td>
         <td>
-          <span class="label" [ngClass]="{'label-success': (player == finishedGame.winner), 'label-default':(player != finishedGame.winner)}">{{player.userName}}</span>
+          <span class="label" [ngClass]="{'label-success': (finishedGame.winner != null && player.id == finishedGame.winner.id), 'label-default':(finishedGame.winner == null || player.id != finishedGame.winner.id)}">{{player.userName}}</span>
         </td>
       </template>
     </tr>
