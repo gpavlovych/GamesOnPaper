@@ -1,30 +1,9 @@
-<div class="col-sm-9 container">
-<table>
-  <tr *ngFor="let row of game.data.rows; let rowIndex = index">
-    <td *ngFor="let cell of row; let columnIndex = index" class="crosszerocell" [ngClass]="{'winningcell': game.data.result[rowIndex][columnIndex]}" (click)="checkCell(rowIndex, columnIndex)">
-      {{cell | displayCrossZero}}
-    </td>
-  </tr>
-</table>
-</div>
-<div class="col-sm-3 container">
-  <app-top100players></app-top100players>
-</div>
-<!-- Modal -->
-
-<div bsModal #showWinnerModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" aria-label="Close" (click)="showWinnerModal.hide()">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <h4 class="modal-title">Game over!</h4>
-      </div>
-      <div class="modal-body">
-        <p *ngIf="game.winner!=null">{{game.players[game.winner].userName}} is the winner!</p>
-        <p *ngIf="game.winner==null">Draw!</p>
-      </div>
-    </div>
-  </div>
+<div class="col-sm-9 container" *ngIf="game != null && game.data != null">
+  <table>
+    <tr *ngFor="let row of game.data.rows; let rowIndex = index">
+      <td *ngFor="let cell of row; let columnIndex = index" class="crosszerocell" [ngClass]="{'winningcell': game.data.result[rowIndex][columnIndex]}" (click)="checkCell(rowIndex, columnIndex)">
+        {{cell | displayCrossZero}}
+      </td>
+    </tr>
+  </table>
 </div>

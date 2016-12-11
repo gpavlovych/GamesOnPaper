@@ -1,11 +1,11 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnInit, Input, OnChanges} from '@angular/core';
 import {GameInfo} from "../game";
 import {ConfirmationService} from "../confirmation.service";
 import {GameService} from "../game.service";
 import {AlertService} from "../alert.service";
 import {RefreshService} from "../refresh.service";
 import {UserInfoService} from "../user-info.service";
-import {UserDetails} from "../user";
+import {UserDetails, UserInfo} from "../user";
 import {GameFinishRequestInfo} from "../game-finish-request-info";
 
 @Component({
@@ -13,9 +13,11 @@ import {GameFinishRequestInfo} from "../game-finish-request-info";
   templateUrl: './active-game-row.component.html',
   styleUrls: ['./active-game-row.component.css']
 })
-export class ActiveGameRowComponent implements OnInit {
+export class ActiveGameRowComponent implements OnInit, OnChanges {
 
   currentUser: UserDetails = null;
+
+  withYourself: boolean = false;
 
   @Input() activeFinishRequests: {};
   @Input() activeGame: GameInfo;
@@ -33,13 +35,36 @@ export class ActiveGameRowComponent implements OnInit {
     this.refreshService.getRefresher().subscribe(() => this.refresh());
   }
 
+  ngOnChanges() {
+    this.refreshWithYourself();
+  }
+
+  private static allEqualTo(arr: UserInfo[], val: UserDetails): boolean {
+    for (let arrItem of arr) {
+      if (arrItem.id != val.id) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private refresh() {
     this.refreshCurrentUser();
   }
 
   private refreshCurrentUser() {
     this.currentUser = null;
-    this.userInfoService.getCurrentUser().subscribe(data => this.currentUser = data);
+    this.withYourself = false;
+    this.userInfoService.getCurrentUser().subscribe(data => {
+      this.currentUser = data;
+      this.refreshWithYourself();
+    });
+  }
+
+  private refreshWithYourself() {
+    if (this.currentUser && this.activeGame.players) {
+      this.withYourself = ActiveGameRowComponent.allEqualTo(this.activeGame.players, this.currentUser);
+    }
   }
 
   finish(game: GameInfo) {

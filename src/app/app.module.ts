@@ -32,10 +32,13 @@ import {ActiveGameRowComponent} from './active-game-row/active-game-row.componen
 import {NewGameRowComponent} from './new-game-row/new-game-row.component';
 import {FinishGameRowComponent} from './finish-game-row/finish-game-row.component';
 import {UserInfoService} from "./user-info.service";
+import {GameComponent} from './game/game.component';
+import {GameTicTacToeService} from './game-tic-tac-toe.service';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'creategame/:id', component: CreateGameComponent, canActivate: [AuthGuard] },
+  { path: 'game/:id', component: GameComponent, canActivate: [AuthGuard] },
   { path: 'tictactoe', component: GameTicTacToeComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
@@ -61,7 +64,8 @@ const appRoutes: Routes = [
     UserAvatarComponent,
     ActiveGameRowComponent,
     NewGameRowComponent,
-    FinishGameRowComponent
+    FinishGameRowComponent,
+    GameComponent
   ],
   imports: [
     BrowserModule,
@@ -82,6 +86,7 @@ const appRoutes: Routes = [
     ConfirmationService,
     AuthenticationService,
     GameService,
+    GameTicTacToeService,
     UserService,
     RefreshService,
     UserInfoService,

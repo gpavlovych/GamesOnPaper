@@ -1,19 +1,26 @@
 <template [ngIf]="currentUser != null && activeGame != null">
   <table>
     <tr>
-      <td style="white-space: nowrap; overflow: hidden">
-        Playing with:&nbsp;
-      </td>
-      <template ngFor let-player [ngForOf]="activeGame.players">
-        <template [ngIf]="player.id != currentUser.id">
-          <td>
-            <div style="width: 50px; height: 50px;">
-              <app-user-avatar [user]="player"></app-user-avatar>
-            </div>
-          </td>
-          <td>
-            <label class="label label-default">{{player.userName}}</label>
-          </td>
+      <template [ngIf]="withYourself">
+        <td style="white-space: nowrap; overflow: hidden">
+          Playing with yourself&nbsp;
+        </td>
+      </template>
+      <template [ngIf]="!withYourself">
+        <td style="white-space: nowrap; overflow: hidden">
+          Playing with:&nbsp;
+        </td>
+        <template ngFor let-player [ngForOf]="activeGame.players">
+          <template [ngIf]="player.id != currentUser.id">
+            <td>
+              <div style="width: 50px; height: 50px;">
+                <app-user-avatar [user]="player"></app-user-avatar>
+              </div>
+            </td>
+            <td>
+              <label class="label label-default">{{player.userName}}</label>
+            </td>
+          </template>
         </template>
       </template>
       <td>
@@ -26,29 +33,31 @@
       </td>
     </tr>
   </table>
-  <table>
-    <template [ngIf]="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id != currentUser.id">
-      <tr>
-        <td style="white-space: nowrap; overflow: hidden">
-          {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game.
-        </td>
-        <td>
-          <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-ok"></span>Accept</button>
-        </td>
-        <td>
-          <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>Decline</button>
-        </td>
-      </tr>
-    </template>
-    <template [ngIf]="activeFinishRequests[activeGame.id] && activeFinishRequests[activeGame.id].createdBy.id == currentUser.id">
-      <tr>
-        <td style="white-space: nowrap; overflow: hidden">
-          You want to finish the game. Waiting for opponent decision.
-        </td>
-        <td>
-          <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
-        </td>
-      </tr>
-    </template>
-  </table>
+  <template [ngIf]="activeFinishRequests[activeGame.id] != null">
+    <table>
+      <template [ngIf]="activeFinishRequests[activeGame.id].createdBy.id != currentUser.id">
+        <tr>
+          <td style="white-space: nowrap; overflow: hidden">
+            {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game.
+          </td>
+          <td>
+            <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-ok"></span>Accept</button>
+          </td>
+          <td>
+            <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>Decline</button>
+          </td>
+        </tr>
+      </template>
+      <template [ngIf]="activeFinishRequests[activeGame.id].createdBy.id == currentUser.id">
+        <tr>
+          <td style="white-space: nowrap; overflow: hidden">
+            You want to finish the game. Waiting for opponent decision.
+          </td>
+          <td>
+            <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+          </td>
+        </tr>
+      </template>
+    </table>
+  </template>
 </template>

@@ -84,7 +84,7 @@ export class CreateGameComponent implements OnInit {
     this.userService.getAllCount().subscribe(data => this.usersTotalCount = data);
   }
 
-  private _usersCurrentPage: number;
+  private _usersCurrentPage: number = 1;
 
   get usersCurrentPage(): number {
     return this._usersCurrentPage;

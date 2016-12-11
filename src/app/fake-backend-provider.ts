@@ -1,7 +1,7 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import {GameDefinitionInfo, GameDefinitionDetails} from "./game-definition";
-import {GameInfo, Game} from "./game";
+import {GameInfo, Game, GameDetails} from "./game";
 import {GameState} from "./game-state.enum";
 import {UserInfo, UserDetails, User} from "./user";
 import {CreateGameViewModel} from "./view-models/create-game-view-model";
@@ -10,6 +10,8 @@ import {GameFinishRequest} from "./game-finish-request";
 import {GameFinishRequestState} from "./game-finish-request-state.enum";
 import {GameFinishRequestInfo} from "./game-finish-request-info";
 import {CreateGameFinishRequestViewModel} from "./view-models/create-game-finish-request-view-model";
+import {GameTicTacToeMoveViewModel} from "./view-models/game-tic-tac-toe-move-view-model";
+import {GameTicTacToeData} from "./game-tic-tac-toe/game-tic-tac-toe-data";
 
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
@@ -18,7 +20,7 @@ export let fakeBackendProvider = {
     // array in local storage for registered users
     //localStorage.removeItem('users');
     //localStorage.removeItem('games');
-
+    //localStorage.removeItem('gameFinishRequests');
     // configure fake backend
     backend.connections.subscribe((connection: MockConnection) => {
 //      console.log('connection!');
@@ -28,6 +30,109 @@ export let fakeBackendProvider = {
         let games: Game[] = JSON.parse(localStorage.getItem('games')) || [];
         let gameFinishRequests: GameFinishRequest[] = JSON.parse(localStorage.getItem('gameFinishRequests')) || [];
         console.log("url:"+connection.request.url);
+
+        function checkCell(game: Game, rowIndex: number, columnIndex: number, currentUserId: any): boolean {
+          if (game.state != GameState.active ||
+            game.data.rows[rowIndex][columnIndex] != null ||
+            game.playerIds[game.data.activePlayer] != currentUserId) {
+
+            return false;
+          }
+
+          game.data.rows[rowIndex][columnIndex] = game.data.activePlayer;
+          game.data.moves--;
+
+          if (checkWinner(game, rowIndex, columnIndex)) {
+            game.winnerId = game.playerIds[game.data.activePlayer];
+            game.state = GameState.finished;
+          }
+
+          if (game.data.moves == 0) {
+            game.state = GameState.finished;
+          }
+
+          game.data.activePlayer = (game.data.activePlayer + 1) % 2;
+          return true;
+        }
+
+        function checkWinner(game: Game, rowIndex:number, columnIndex:number): boolean {
+          let currentValue = game.data.rows[rowIndex][columnIndex];
+          let result = false;
+
+          //horizontal won
+          if (game.data.rows[0][columnIndex] == currentValue &&
+            game.data.rows[1][columnIndex] == currentValue &&
+            game.data.rows[2][columnIndex] == currentValue) {
+            game.data.result[0][columnIndex] = true;
+            game.data.result[1][columnIndex] = true;
+            game.data.result[2][columnIndex] = true;
+            result = true;
+          }
+
+          //vertical won
+          if (game.data.rows[rowIndex][0] == currentValue &&
+            game.data.rows[rowIndex][1] == currentValue &&
+            game.data.rows[rowIndex][2] == currentValue) {
+            game.data.result[rowIndex][0] = true;
+            game.data.result[rowIndex][1] = true;
+            game.data.result[rowIndex][2] = true;
+            result = true;
+          }
+
+          //diagonal won
+          if ((rowIndex == columnIndex) || (2 - rowIndex == columnIndex)) {
+            if (game.data.rows[0][0] == currentValue &&
+              game.data.rows[1][1] == currentValue &&
+              game.data.rows[2][2] == currentValue) {
+              game.data.result[0][0] = true;
+              game.data.result[1][1] = true;
+              game.data.result[2][2] = true;
+              result = true;
+            }
+            if (game.data.rows[2][0] == currentValue &&
+              game.data.rows[1][1] == currentValue &&
+              game.data.rows[0][2] == currentValue) {
+              game.data.result[2][0] = true;
+              game.data.result[1][1] = true;
+              game.data.result[0][2] = true;
+              result = true;
+            }
+          }
+
+          return result;
+        }
+
+        function getGameById(id: any): Game{
+          for (let game of games){
+            if (game.id == id){
+              return game;
+            }
+          }
+          return null;
+        }
+
+        function getGameDetailsById(id: any): GameDetails {
+          let game: Game = getGameById(id);
+          if (game != null) {
+            let players: UserInfo[] = [];
+            for (let playerId of game.playerIds) {
+              players.push(userInfosDictionary[playerId]);
+            }
+
+            return {
+              data: game.data,
+              id: game.id,
+              gameDefinition: gameDefinitionInfosDictionary[game.gameDefinitionId],
+              createdBy: userInfosDictionary[game.createdById],
+              createdDate: game.createdDate,
+              players: players,
+              state: game.state,
+              winner: null
+            };
+          }
+
+          return null;
+        }
 
         function hasSameItems(values: any[]): boolean {
           if (values && values.length > 0) {
@@ -333,7 +438,7 @@ export let fakeBackendProvider = {
           if (authenticatedUser) {
             connection.mockRespond(new Response(new ResponseOptions({
               status: 200,
-              body: users.slice(skip, take + skip)
+              body: userInfos.slice(skip, take + skip)
             })));
           } else {
             // return 401 not authorised if token is null or invalid
@@ -371,6 +476,41 @@ export let fakeBackendProvider = {
           }
         }
 
+        // get game by id
+        let gamesMatch = connection.request.url.match(/\/api\/games\/(\d+)$/);
+        if (gamesMatch && gamesMatch.length > 1 && connection.request.method === RequestMethod.Get) {
+          let gameId = parseInt(gamesMatch[1]);
+          // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
+          if (authenticatedUser) {
+            let gameDetails: GameDetails = getGameDetailsById(gameId);
+
+            // respond 200 OK with user
+            connection.mockRespond(new Response(new ResponseOptions({status: 200, body: gameDetails})));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
+          }
+        }
+
+        // make tic-tac-toe game move
+        if (connection.request.url.endsWith('/api/games/tictactoe') && connection.request.method === RequestMethod.Post) {
+          // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
+          if (authenticatedUser) {
+            // get new game object from post body
+            let moveVm: GameTicTacToeMoveViewModel = JSON.parse(connection.request.getBody());
+            let game: Game = getGameById(moveVm.gameId);
+
+            if (checkCell(game, moveVm.rowIndex, moveVm.columnIndex, authenticatedUser.id)){
+              localStorage.setItem('games', JSON.stringify(games));
+            }
+            // respond 200 OK with user
+            connection.mockRespond(new Response(new ResponseOptions({status: 200})));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
+          }
+        }
+
         // get user by id
         if (connection.request.url.match(/\/api\/users\/\d+$/) && connection.request.method === RequestMethod.Get) {
           // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
@@ -396,15 +536,34 @@ export let fakeBackendProvider = {
           if (authenticatedUser) {
             // get new game object from post body
             let newGameCreateVm: CreateGameViewModel = JSON.parse(connection.request.getBody());
+            let playerIds = [authenticatedUser.id];
+            for (let playerId of newGameCreateVm.playerIds){
+              playerIds.push(playerId);
+            }
+            let data: any = null;
+            if (newGameCreateVm.gameDefinitionId == 1) {//tic-tac-toe
+              data = <GameTicTacToeData> {
+                activePlayer: 0,
+                rows: [
+                  [null, null, null],
+                  [null, null, null],
+                  [null, null, null]],
+                result: [
+                  [false, false, false],
+                  [false, false, false],
+                  [false, false, false]],
+                moves: 9
+              };
+            }
             let newGame: Game = {
               id: games.length + 1,
-              data: {},
+              data: data,
               createdDate: new Date(),
               createdById: authenticatedUser.id,
-              playerIds: newGameCreateVm.playerIds,
+              playerIds: playerIds,
               winnerId: null,
               gameDefinitionId: newGameCreateVm.gameDefinitionId,
-              state: hasSameItems(newGameCreateVm.playerIds)?GameState.active:GameState.new
+              state: hasSameItems(playerIds)?GameState.active:GameState.new
             };
 
             // save new game
