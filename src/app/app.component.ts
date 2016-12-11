@@ -75,7 +75,6 @@ export class AppComponent implements OnInit {
   }
 
   private refreshFinishedGames() {
-    this.finishedGames = [];
     this.gameService.getFinished(0, this.finishedGamesTop).subscribe(data => {
       if (data) {
         this.finishedGames = data;
@@ -84,13 +83,10 @@ export class AppComponent implements OnInit {
   }
 
   private refreshFinishedGamesTotalCount() {
-    this.finishedGamesTotalCount = 0;
     this.gameService.getFinishedCount().subscribe(data => this.finishedGamesTotalCount = data);
   }
 
   private refreshActiveGames() {
-    this.activeGames = [];
-    this.activeFinishRequests = {};
     this.gameService.getActive(0, this.activeGamesTop).subscribe(data => {
       if (data) {
         this.activeGames = data;
@@ -100,12 +96,10 @@ export class AppComponent implements OnInit {
   }
 
   private refreshActiveGamesTotalCount() {
-    this.activeGamesTotalCount = 0;
     this.gameService.getActiveCount().subscribe(data => this.activeGamesTotalCount = data);
   }
 
   private refreshOutgoingInvitations() {
-    this.outgoingInvitations = [];
     this.gameService.getOutgoing(0, this.outgoingInvitationsTop).subscribe(data => {
       if (data) {
         this.outgoingInvitations = data;
@@ -114,12 +108,10 @@ export class AppComponent implements OnInit {
   }
 
   private refreshOutgoingInvitationsTotalCount() {
-    this.outgoingInvitationsTotalCount = 0;
     this.gameService.getOutgoingCount().subscribe(data => this.outgoingInvitationsTotalCount = data);
   }
 
   private refreshIncomingInvitations() {
-    this.incomingInvitations = [];
     this.gameService.getIncoming(0, this.incomingInvitationsTop).subscribe(data => {
       if (data) {
         this.incomingInvitations = data;
@@ -128,12 +120,10 @@ export class AppComponent implements OnInit {
   }
 
   private refreshIncomingInvitationsTotalCount() {
-    this.incomingInvitationsTotalCount = 0;
     this.gameService.getIncomingCount().subscribe(data => this.incomingInvitationsTotalCount = data);
   }
 
   private refreshGamesToBeCreated() {
-    this.gamesToBeCreated = [];
     this.gameService.getGameDefinitions(0, this.gamesToBeCreatedTop).subscribe(data => {
       if (data) {
         this.gamesToBeCreated = data;
@@ -142,16 +132,16 @@ export class AppComponent implements OnInit {
   }
 
   private refreshGamesToBeCreatedTotalCount() {
-    this.gamesToBeCreatedTotalCount = 0;
     this.gameService.getGameDefinitionsCount().subscribe(data => this.gamesToBeCreatedTotalCount = data);
   }
 
   private refreshCurrentUser() {
-    this.currentUser = null;
     this.userInfoService.getCurrentUser().subscribe(data => this.currentUser = data);
   }
 
   private refreshActiveGameFinishedRequests() {
+    this.activeFinishRequests = {};
+
     for (let activeGame of this.activeGames) {
       let activeGameFinishRequest = AppComponent.getActiveFinishRequest(activeGame);
       if (activeGameFinishRequest) {

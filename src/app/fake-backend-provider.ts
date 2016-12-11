@@ -32,6 +32,7 @@ export let fakeBackendProvider = {
         console.log("url:"+connection.request.url);
 
         function checkCell(game: Game, rowIndex: number, columnIndex: number, currentUserId: any): boolean {
+          console.log("rowIndex "+rowIndex+":"+"columnIndex "+columnIndex+" checked")
           if (game.state != GameState.active ||
             game.data.rows[rowIndex][columnIndex] != null ||
             game.playerIds[game.data.activePlayer] != currentUserId) {

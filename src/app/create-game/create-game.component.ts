@@ -61,17 +61,14 @@ export class CreateGameComponent implements OnInit {
   }
 
   private refreshGameDefinition() {
-    this.gameDefinition = null;
     this.gameService.getGameDefinitionDetails(this.gameDefinitionId).subscribe(data => this.gameDefinition = data);
   }
 
   private refreshCurrentUser() {
-    this.currentUser = null;
     this.userInfoService.getCurrentUser().subscribe(data => this.currentUser = data);
   }
 
   private refreshUsers() {
-    this.users = [];
     this.userService.getAll(this.usersTop * (this._usersCurrentPage - 1), this.usersTop).subscribe(data => {
       if (data) {
         this.users = data
@@ -80,7 +77,6 @@ export class CreateGameComponent implements OnInit {
   }
 
   private refreshUsersTotalCount() {
-    this.usersTotalCount = 0;
     this.userService.getAllCount().subscribe(data => this.usersTotalCount = data);
   }
 

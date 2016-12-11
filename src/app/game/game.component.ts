@@ -44,12 +44,10 @@ export class GameComponent implements OnInit {
   }
 
   private refreshCurrentUser() {
-    this.currentUser = null;
     this.userInfoService.getCurrentUser().subscribe(data => this.currentUser = data);
   }
 
   private refreshGame() {
-    this.game = null;
     this.gameService.getById(this.gameId).subscribe(data => {
       this.game = data
     });

@@ -53,8 +53,6 @@ export class ActiveGameRowComponent implements OnInit, OnChanges {
   }
 
   private refreshCurrentUser() {
-    this.currentUser = null;
-    this.withYourself = false;
     this.userInfoService.getCurrentUser().subscribe(data => {
       this.currentUser = data;
       this.refreshWithYourself();
