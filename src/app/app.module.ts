@@ -35,6 +35,7 @@ import {UserInfoService} from "./user-info.service";
 import {GameComponent} from './game/game.component';
 import {GameTicTacToeService} from './game-tic-tac-toe.service';
 import { GameDotsComponent } from './game-dots/game-dots.component';
+import {GameDotsService} from "./game-dots.service";
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -89,6 +90,7 @@ const appRoutes: Routes = [
     AuthenticationService,
     GameService,
     GameTicTacToeService,
+    GameDotsService,
     UserService,
     RefreshService,
     UserInfoService,

@@ -1,8 +1,10 @@
-import {Component, OnInit, Input, ViewChild, AfterViewInit} from '@angular/core';
+import {Component, OnInit, Input, ViewChild, AfterViewInit, HostListener} from '@angular/core';
 import {GameDetails} from "../game";
 import {GameDotsData} from "./game-dots-data";
 import {GameDotsDataDot} from "./game-dots-data-dot";
 import {GameDotsDataPolygon} from "./game-dots-data-polygon";
+import {GameDotsService} from "../game-dots.service";
+import {RefreshService} from "../refresh.service";
 
 @Component({
   selector: 'app-game-dots',
@@ -25,7 +27,7 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
   private pixelsPerMm:number;
   private pixelsPerGridCell: number;
 
-  constructor() {
+  constructor(private gameDotsService: GameDotsService, private refreshService: RefreshService) {
     this.pixelsPerMm = this.pixelsPerInch / this.mmsPerInch;
     this.pixelsPerGridCell = this.pixelsPerMm * this.mmsPerGridCell;
   }
@@ -36,6 +38,22 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
 
   ngOnChanges() {
     this.refresh();
+  }
+
+  @HostListener('mousedown', ['$event'])
+  makeTurn(event: MouseEvent) {
+    var lastX, lastY;
+    if (event.offsetX !== undefined) {
+      lastX = event.offsetX;
+      lastY = event.offsetY;
+    }
+    let indexX = Math.round(lastX / this.pixelsPerGridCell);
+    let indexY = Math.round(lastY / this.pixelsPerGridCell);
+    this.gameDotsService.makeTurn({
+      indexX: indexX,
+      indexY: indexY,
+      gameId: this.game.id
+    }).subscribe(() => this.refreshService.refresh());
   }
 
   ngAfterViewInit() {

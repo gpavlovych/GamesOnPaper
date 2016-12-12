@@ -14,7 +14,9 @@ import {GameTicTacToeMoveViewModel} from "./view-models/game-tic-tac-toe-move-vi
 import {GameTicTacToeData} from "./game-tic-tac-toe/game-tic-tac-toe-data";
 import {GameDotsData} from "./game-dots/game-dots-data";
 import {GameDotsDataDot} from "./game-dots/game-dots-data-dot";
-import {GameDotsDataPolygon} from "./game-dots/game-dots-data-polygon";
+import {GameDotsMoveViewModel} from "./view-models/game-dots-move-view-model";
+import {PolygonService} from "./polygon-service";
+import {GameDotsDataPolygonPoint} from "./game-dots/game-dots-data-polygon-point";
 
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
@@ -43,8 +45,259 @@ export let fakeBackendProvider = {
         let gameFinishRequests: GameFinishRequest[] = JSON.parse(localStorage.getItem('gameFinishRequests')) || [];
         console.log("url:"+connection.request.url);
 
+        function makeTurnDots(game: Game, indexX: number, indexY: number, currentUserId: any){
+          console.log("rowIndex "+indexX+":"+"columnIndex "+indexX+" turn");
+          let data: GameDotsData = game.data;
+          let dot = data.dots[indexX][indexY];
+          if (game.state != GameState.active || dot == null || (!dot.free) || dot.playerIndex != null || game.playerIds[data.activePlayer] != currentUserId) {
+
+            return false;
+          }
+
+          function wave(i, j, markedProperty, enemyVertices) {
+            let waveFront = [];
+            let goalReached = false;
+            let marked = [];
+
+            function pushIfAccessible(item) {
+              if ((item.x < 0 || item.x >= data.dots.length) || (item.y < 0 || item.y >= data.dots[item.x].length)) {
+                goalReached = true;
+                return;
+              }
+              let currentCell = data.dots[item.x][item.y];
+              if (currentCell.playerIndex == 1 - data.dots[i][j].playerIndex) {
+                enemyVertices.push(item);
+                return;
+              }
+              if (!currentCell.hasOwnProperty(markedProperty)) {
+                marked.push(currentCell);
+                currentCell[markedProperty] = true;
+                waveFront.push(item);
+              }
+            }
+
+            pushIfAccessible({x: i, y: j});
+            while (!goalReached && waveFront.length > 0) {
+              let item = waveFront.pop();
+              pushIfAccessible({x: item.x + 1, y: item.y});
+              pushIfAccessible({x: item.x, y: item.y + 1});
+              pushIfAccessible({x: item.x - 1, y: item.y});
+              pushIfAccessible({x: item.x, y: item.y - 1});
+            }
+            while (marked.length > 0) {
+              delete marked.pop()[markedProperty];
+            }
+            return goalReached;
+          }
+
+          function searchFor(list: GameDotsDataPolygonPoint[]) {
+            function isConnected(u: number, v: number) {
+              return u != v &&
+                ((list[u].x - list[v].x) * (list[u].x - list[v].x) <= 1) &&
+                ((list[u].y - list[v].y) * (list[u].y - list[v].y) <= 1);
+            }
+
+            function findCycle(u: number, v: number) {
+              marked[v] = true;
+              for (let w=0; w < list.length; w++) {
+                if (cycle) return;
+                if (isConnected(v, w)) {
+                  if (!marked.hasOwnProperty(w)) {
+                    edgeTo[w] = v;
+                    findCycle(v, w);
+                  }
+                  else if (w != u) {
+                    edgeTo[w] = v;
+                    cycle = [];
+                    for (let x = v; x != w && x !== undefined; x = edgeTo[x]) {
+                      cycle.push(x);
+                    }
+                    cycle.push(w);
+                  }
+                }
+              }
+            }
+
+            function removeDuplicates() {
+              let u = {}, a = [];
+              for (let i = 0, l = list.length; i < l; ++i) {
+                let propName = list[i].x + "_" + list[i].y;
+                if (u.hasOwnProperty(propName)) {
+                  continue;
+                }
+                a.push(list[i]);
+                u[propName] = 1;
+              }
+              list = a;
+            }
+
+            let result = [];
+            let marked;
+            let edgeTo;
+            let cycle;
+
+            removeDuplicates();
+            for (let listIndex = 0; listIndex < list.length; listIndex++) {
+              let cycleStart = listIndex;
+              marked = {};
+              edgeTo = {};
+              cycle = null;
+              findCycle(-1, cycleStart);
+              if (cycle) {
+                let poly = [];
+                while (cycle.length > 0) {
+                  poly.push(list[cycle.pop()]);
+                }
+                result.push(poly);
+              }
+            }
+            return result;
+          }
+
+          function poly1ContainsInPoly2(poly1Path, poly2Path) {
+            let contains = true;
+            for (let vert1 of poly1Path) {
+              contains = contains && PolygonService.checkPointInsidePoly(vert1, poly2Path);
+            }
+            return contains;
+          }
+
+          function addPolyAndRemoveAllWhichFullyBelongTo(poly) {
+            if (poly.path.length <= 2) return;
+            data.polygons = data.polygons || [];
+            for (let i = 0; i < data.polygons.length; i++) {
+              if ((poly1ContainsInPoly2(data.polygons[i].path, poly.path))) {
+                data.polygons.splice(i, 1);
+                i--;
+              }
+            }
+            data.polygons.push(poly);
+          }
+
+          function countScores() {
+            for (let scoreIndex = 0; scoreIndex < data.scores.length; scoreIndex++) {
+              data.scores[scoreIndex] = 0;
+            }
+
+            for (let i = 0; i < data.dots.length; i++) {
+              for (let j = 0; j < data.dots[i].length; j++)
+                if (data.scores.hasOwnProperty(data.dots[i][j].playerIndex)) {
+                  data.scores[data.dots[i][j].playerIndex]++;
+                }
+            }
+          }
+
+          function canDoAMove(indexX, indexY) {
+            if (data.dots[indexX][indexY].playerIndex == null) {
+              let containsInPoly = false;
+              for (let poly of data.polygons) {
+                containsInPoly = containsInPoly || PolygonService.checkPointInsidePoly({
+                    x: indexX,
+                    y: indexY
+                  }, poly.path);
+              }
+              if (!containsInPoly) {
+                return true;
+              }
+            }
+            return false;
+          }
+
+          function countRemainingMoves() {
+            data.remainingMoves = 0;
+            for (let i = 0; i < data.dots.length; i++) {
+              for (let j = 0; j < data.dots[i].length; j++)
+                if (canDoAMove(i, j)) {
+                  data.remainingMoves++;
+                }
+            }
+          }
+
+          if (canDoAMove(indexX, indexY)) {
+            data.dots[indexX][indexY].playerIndex = data.activePlayer;
+            let lostPoints = [];
+            for (let i = 0; i < data.dots.length; i++) {
+              for (let j = 0; j < data.dots[i].length; j++) {
+                if (data.dots[i][j].playerIndex == 1 - data.activePlayer) {
+                  let markedValues = [];
+                  let enemyVertices = [];
+                  let markedProperty = "marked" + Math.floor(Math.random() * 10000000000000001);
+                  if (!wave(i, j, markedProperty, enemyVertices)) {
+                    lostPoints.push({x: i, y: j, enemyVertices: enemyVertices});
+                  }
+                }
+              }
+            }
+            while (lostPoints.length > 0) {
+              let pointInfo = lostPoints.pop();
+              data.dots[pointInfo.x][pointInfo.y].playerIndex = 1 - data.dots[pointInfo.x][pointInfo.y].playerIndex;
+              let polys = searchFor(pointInfo.enemyVertices);
+              while (polys.length > 0) {
+                let path = polys.pop();
+                addPolyAndRemoveAllWhichFullyBelongTo({
+                  path: path,
+                  color: data.dots[pointInfo.x][pointInfo.y].playerIndex
+                });
+              }
+            }
+            countScores();
+            countRemainingMoves();
+            data.activePlayer = 1-data.activePlayer;
+            return true;
+          }
+          return false;
+
+        }
+
         function checkCell(game: Game, rowIndex: number, columnIndex: number, currentUserId: any): boolean {
-          console.log("rowIndex "+rowIndex+":"+"columnIndex "+columnIndex+" checked")
+          console.log("rowIndex "+rowIndex+":"+"columnIndex "+columnIndex+" checked");
+          function checkWinner(game: Game, rowIndex:number, columnIndex:number): boolean {
+            let currentValue = game.data.rows[rowIndex][columnIndex];
+            let result = false;
+
+            //horizontal won
+            if (game.data.rows[0][columnIndex] == currentValue &&
+              game.data.rows[1][columnIndex] == currentValue &&
+              game.data.rows[2][columnIndex] == currentValue) {
+              game.data.result[0][columnIndex] = true;
+              game.data.result[1][columnIndex] = true;
+              game.data.result[2][columnIndex] = true;
+              result = true;
+            }
+
+            //vertical won
+            if (game.data.rows[rowIndex][0] == currentValue &&
+              game.data.rows[rowIndex][1] == currentValue &&
+              game.data.rows[rowIndex][2] == currentValue) {
+              game.data.result[rowIndex][0] = true;
+              game.data.result[rowIndex][1] = true;
+              game.data.result[rowIndex][2] = true;
+              result = true;
+            }
+
+            //diagonal won
+            if ((rowIndex == columnIndex) || (2 - rowIndex == columnIndex)) {
+              if (game.data.rows[0][0] == currentValue &&
+                game.data.rows[1][1] == currentValue &&
+                game.data.rows[2][2] == currentValue) {
+                game.data.result[0][0] = true;
+                game.data.result[1][1] = true;
+                game.data.result[2][2] = true;
+                result = true;
+              }
+              if (game.data.rows[2][0] == currentValue &&
+                game.data.rows[1][1] == currentValue &&
+                game.data.rows[0][2] == currentValue) {
+                game.data.result[2][0] = true;
+                game.data.result[1][1] = true;
+                game.data.result[0][2] = true;
+                result = true;
+              }
+            }
+
+            return result;
+          }
+
           if (game.state != GameState.active ||
             game.data.rows[rowIndex][columnIndex] != null ||
             game.playerIds[game.data.activePlayer] != currentUserId) {
@@ -66,53 +319,6 @@ export let fakeBackendProvider = {
 
           game.data.activePlayer = (game.data.activePlayer + 1) % 2;
           return true;
-        }
-
-        function checkWinner(game: Game, rowIndex:number, columnIndex:number): boolean {
-          let currentValue = game.data.rows[rowIndex][columnIndex];
-          let result = false;
-
-          //horizontal won
-          if (game.data.rows[0][columnIndex] == currentValue &&
-            game.data.rows[1][columnIndex] == currentValue &&
-            game.data.rows[2][columnIndex] == currentValue) {
-            game.data.result[0][columnIndex] = true;
-            game.data.result[1][columnIndex] = true;
-            game.data.result[2][columnIndex] = true;
-            result = true;
-          }
-
-          //vertical won
-          if (game.data.rows[rowIndex][0] == currentValue &&
-            game.data.rows[rowIndex][1] == currentValue &&
-            game.data.rows[rowIndex][2] == currentValue) {
-            game.data.result[rowIndex][0] = true;
-            game.data.result[rowIndex][1] = true;
-            game.data.result[rowIndex][2] = true;
-            result = true;
-          }
-
-          //diagonal won
-          if ((rowIndex == columnIndex) || (2 - rowIndex == columnIndex)) {
-            if (game.data.rows[0][0] == currentValue &&
-              game.data.rows[1][1] == currentValue &&
-              game.data.rows[2][2] == currentValue) {
-              game.data.result[0][0] = true;
-              game.data.result[1][1] = true;
-              game.data.result[2][2] = true;
-              result = true;
-            }
-            if (game.data.rows[2][0] == currentValue &&
-              game.data.rows[1][1] == currentValue &&
-              game.data.rows[0][2] == currentValue) {
-              game.data.result[2][0] = true;
-              game.data.result[1][1] = true;
-              game.data.result[0][2] = true;
-              result = true;
-            }
-          }
-
-          return result;
         }
 
         function getGameDefinitionById(id: any): GameDefinition {
@@ -569,6 +775,25 @@ export let fakeBackendProvider = {
             let game: Game = getGameById(moveVm.gameId);
 
             if (checkCell(game, moveVm.rowIndex, moveVm.columnIndex, authenticatedUser.id)){
+              localStorage.setItem('games', JSON.stringify(games));
+            }
+            // respond 200 OK with user
+            connection.mockRespond(new Response(new ResponseOptions({status: 200})));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(new ResponseOptions({status: 401})));
+          }
+        }
+
+        // make dots game move
+        if (connection.request.url.endsWith('/api/games/dots') && connection.request.method === RequestMethod.Post) {
+          // check for fake auth token in header and return user if valid, this security is implemented server side in a real application
+          if (authenticatedUser) {
+            // get new game object from post body
+            let moveVm: GameDotsMoveViewModel = JSON.parse(connection.request.getBody());
+            let game: Game = getGameById(moveVm.gameId);
+
+            if (makeTurnDots(game, moveVm.indexX, moveVm.indexY, authenticatedUser.id)){
               localStorage.setItem('games', JSON.stringify(games));
             }
             // respond 200 OK with user
