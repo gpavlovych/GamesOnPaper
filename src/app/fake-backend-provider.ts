@@ -12,6 +12,9 @@ import {GameFinishRequestInfo} from "./game-finish-request-info";
 import {CreateGameFinishRequestViewModel} from "./view-models/create-game-finish-request-view-model";
 import {GameTicTacToeMoveViewModel} from "./view-models/game-tic-tac-toe-move-view-model";
 import {GameTicTacToeData} from "./game-tic-tac-toe/game-tic-tac-toe-data";
+import {GameDotsData} from "./game-dots/game-dots-data";
+import {GameDotsDataDot} from "./game-dots/game-dots-data-dot";
+import {GameDotsDataPolygon} from "./game-dots/game-dots-data-polygon";
 
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
@@ -131,6 +134,43 @@ export let fakeBackendProvider = {
             };
           }
           return null;
+        }
+
+        function getNewTicTacToeGameData(): GameTicTacToeData {
+          return {
+            activePlayer: 0,
+            rows: [
+              [null, null, null],
+              [null, null, null],
+              [null, null, null]],
+            result: [
+              [false, false, false],
+              [false, false, false],
+              [false, false, false]],
+            moves: 9
+          };
+        }
+
+        function getNewDotsGameData(): GameDotsData {
+          let sizeX = 60;
+          let sizeY = 43;
+          let dots = new Array<GameDotsDataDot[]>(sizeX);
+          for (let i = 0; i < sizeX; i++) {
+            dots[i] = new Array<GameDotsDataDot>(sizeY);
+            for (let j = 0; j < sizeY; j++) {
+              dots[i][j] = {playerIndex: null, free: true};
+            }
+          }
+          let remainingMoves = sizeX * sizeY; //total amount of moves
+          let polygons = [];
+          let scores = [0, 0];
+          return {
+            activePlayer: 0,
+            dots: dots,
+            polygons: polygons,
+            scores: scores,
+            remainingMoves: remainingMoves
+          };
         }
 
         function getGameById(id: any): Game {
@@ -568,21 +608,15 @@ export let fakeBackendProvider = {
             for (let playerId of newGameCreateVm.playerIds){
               playerIds.push(playerId);
             }
+
             let data: any = null;
             if (newGameCreateVm.gameDefinitionId == 1) {//tic-tac-toe
-              data = <GameTicTacToeData> {
-                activePlayer: 0,
-                rows: [
-                  [null, null, null],
-                  [null, null, null],
-                  [null, null, null]],
-                result: [
-                  [false, false, false],
-                  [false, false, false],
-                  [false, false, false]],
-                moves: 9
-              };
+              data = getNewTicTacToeGameData();
             }
+            else if (newGameCreateVm.gameDefinitionId == 2) {//dots
+              data = getNewDotsGameData();
+            }
+
             let newGame: Game = {
               id: games.length + 1,
               data: data,
@@ -591,7 +625,9 @@ export let fakeBackendProvider = {
               playerIds: playerIds,
               winnerId: null,
               gameDefinitionId: newGameCreateVm.gameDefinitionId,
-              state: hasSameItems(playerIds)?GameState.active:GameState.new
+              state: hasSameItems(playerIds)
+                ? GameState.active
+                : GameState.new
             };
 
             // save new game
