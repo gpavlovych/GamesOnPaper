@@ -1,2 +1,15 @@
-<canvas #myCanvas width="842px" height="597px" style="border:1px solid #d3d3d3;">
-</canvas>
+<div class="row">
+  Your dots:&nbsp;<template ngFor let-playerIndex [ngForOf]="currentPlayerIndex"><span [ngStyle]="{'color': colors[playerIndex]}" class="glyphicon glyphicon-stop"></span></template>
+</div>
+<div class="row">
+  <canvas #myCanvas width="842px" height="597px" style="border:1px solid #d3d3d3;">
+  </canvas>
+</div>
+<div class="row">
+  <h4>
+    Scores
+    <template ngFor let-score [ngForOf]="game.data.scores" let-scoreIndex="index">
+      <span [ngStyle]="{'color': colors[scoreIndex]}">{{score}}</span><span *ngIf="scoreIndex < game.data.scores.length-1">&nbsp;:</span>
+    </template>
+  </h4>
+</div>

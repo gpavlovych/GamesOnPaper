@@ -5,6 +5,8 @@ import {GameDotsDataDot} from "./game-dots-data-dot";
 import {GameDotsDataPolygon} from "./game-dots-data-polygon";
 import {GameDotsService} from "../game-dots.service";
 import {RefreshService} from "../refresh.service";
+import {UserInfoService} from "../user-info.service";
+import {UserDetails} from "../user";
 
 @Component({
   selector: 'app-game-dots',
@@ -14,7 +16,8 @@ import {RefreshService} from "../refresh.service";
 export class GameDotsComponent implements OnInit, AfterViewInit {
   @ViewChild("myCanvas") myCanvas;
   @Input() game: GameDetails;
-
+  currentPlayerIndex: number[] = [];
+  private currentUser: UserDetails = null;
   private myCanvasElement: HTMLCanvasElement = null;
   private backgroundImage: HTMLImageElement = null;
   private renderingContext2d: CanvasRenderingContext2D = null;
@@ -23,17 +26,21 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
   private mmsPerInch: number  = 25.4;
   private mmsPerGridCell: number = 5;
   private dotSize: number = 6;
-
+  colors: string[]=["#ff0000", "#0000ff"];
   private pixelsPerMm:number;
   private pixelsPerGridCell: number;
 
-  constructor(private gameDotsService: GameDotsService, private refreshService: RefreshService) {
+  constructor(
+    private gameDotsService: GameDotsService,
+    private refreshService: RefreshService,
+    private currentUserService: UserInfoService) {
     this.pixelsPerMm = this.pixelsPerInch / this.mmsPerInch;
     this.pixelsPerGridCell = this.pixelsPerMm * this.mmsPerGridCell;
   }
 
   ngOnInit() {
-
+    this.refresh();
+    this.refreshService.getRefresher().subscribe(() => this.refresh());
   }
 
   ngOnChanges() {
@@ -66,6 +73,32 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
   }
 
   private refresh() {
+    this.refreshCurrentUser();
+    this.redraw();
+  }
+
+  private refreshPlayerIndex() {
+    this.currentPlayerIndex = [];
+
+    for (let playerIndex = 0; playerIndex < this.game.players.length; playerIndex++) {
+      if (
+        this.currentUser != null &&
+        this.game.players[playerIndex] != null &&
+        this.game.players[playerIndex].id == this.currentUser.id) {
+
+        this.currentPlayerIndex.push(playerIndex);
+      }
+    }
+  }
+
+  private refreshCurrentUser(){
+    this.currentUserService.getCurrentUser().subscribe(data=>{
+      this.currentUser = data;
+      this.refreshPlayerIndex();
+    });
+  }
+
+  private redraw() {
     if (this.backgroundImage != null && this.renderingContext2d != null) {
       this.renderingContext2d.drawImage(this.backgroundImage, 0, 0);
       if (this.game == null) {
