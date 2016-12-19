@@ -7,6 +7,7 @@ import {GameDotsService} from "../game-dots.service";
 import {RefreshService} from "../refresh.service";
 import {UserInfoService} from "../user-info.service";
 import {UserDetails} from "../user";
+import {HslToRgb} from "../hsl-to-rgb";
 
 @Component({
   selector: 'app-game-dots',
@@ -26,7 +27,7 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
   private mmsPerInch: number  = 25.4;
   private mmsPerGridCell: number = 5;
   private dotSize: number = 6;
-  colors: string[]=["#ff0000", "#0000ff"];
+  colors: string[]=[];
   private pixelsPerMm:number;
   private pixelsPerGridCell: number;
 
@@ -99,6 +100,11 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
   }
 
   private redraw() {
+    this.colors = [];
+    for (let playerIndex = 0; playerIndex < this.game.players.length; playerIndex++) {
+      this.colors.push(HslToRgb.toRgb((playerIndex * 240.0) / (this.game.players.length - 1), 1, 0.5))
+    }
+
     if (this.backgroundImage != null && this.renderingContext2d != null) {
       this.renderingContext2d.drawImage(this.backgroundImage, 0, 0);
       if (this.game == null) {
@@ -126,14 +132,13 @@ export class GameDotsComponent implements OnInit, AfterViewInit {
         for (let indexY = 0; indexY < dotRow.length; indexY++) {
           let dot = dotRow[indexY];
           if (dot != null) {
-            if (dot.playerIndex == 1 && dot.free) {
-              this.renderingContext2d.fillStyle = "blue";
-            }
-            else if (dot.playerIndex == 0 && dot.free) {
-              this.renderingContext2d.fillStyle = "red";
-            }
-            else if (!dot.free) {
-              this.renderingContext2d.fillStyle = "gray";
+            if (dot.playerIndex != null) {
+              if (dot.free) {
+                this.renderingContext2d.fillStyle = this.colors[dot.playerIndex];
+              }
+              else {
+                this.renderingContext2d.fillStyle = "gray";
+              }
             }
             else {
               continue;

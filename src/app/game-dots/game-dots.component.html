@@ -1,5 +1,13 @@
 <div class="row">
-  Your dots:&nbsp;<template ngFor let-playerIndex [ngForOf]="currentPlayerIndex"><span [ngStyle]="{'color': colors[playerIndex]}" class="glyphicon glyphicon-stop"></span></template>
+  <template [ngIf]="currentPlayerIndex.length>1">
+    Your dots:&nbsp;<template ngFor let-playerIndex [ngForOf]="currentPlayerIndex"><span [ngStyle]="{'color': colors[playerIndex]}" class="glyphicon glyphicon-stop"></span></template>
+  </template>
+  <template [ngIf]="currentPlayerIndex.length==1">
+    Your dot:&nbsp;<span [ngStyle]="{'color': colors[currentPlayerIndex[0]]}" class="glyphicon glyphicon-stop"></span>
+  </template>
+  <template [ngIf]="currentPlayerIndex.length==0">
+    None of your dots
+  </template>
 </div>
 <div class="row">
   <canvas #myCanvas width="842px" height="597px" style="border:1px solid #d3d3d3;">

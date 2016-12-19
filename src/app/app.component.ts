@@ -8,6 +8,7 @@ import {RefreshService} from "./refresh.service";
 import {GameFinishRequestState} from "./game-finish-request-state.enum";
 import {UserInfoService} from "./user-info.service";
 import {GameFinishRequestInfo} from "./game-finish-request-info";
+import {Locale, LocalizationService, LocaleService} from "angular2localization";
 
 @Component({
   selector: 'app-root',
@@ -45,8 +46,23 @@ export class AppComponent implements OnInit {
     vcr: ViewContainerRef,
     private gameService: GameService,
     private refreshService: RefreshService,
-    private userInfoService: UserInfoService)
-  {
+    private userInfoService: UserInfoService,
+    public locale: LocaleService,
+    public localization: LocalizationService) {
+
+    // Adds the languages (ISO 639 two-letter or three-letter code).
+    this.locale.addLanguages(['en', 'ru', 'uk']);
+
+    // Required: default language, country (ISO 3166 two-letter, uppercase code) and expiry (No days). If the expiry is omitted, the cookie becomes a session cookie.
+    // Selects the default language and country, regardless of the browser language, to avoid inconsistencies between the language and country.
+    this.locale.definePreferredLocale('en', 'US', 30);
+
+    // Optional: default currency (ISO 4217 three-letter code).
+    this.locale.definePreferredCurrency('USD');
+
+    // Initializes LocalizationService: asynchronous loading.
+    this.localization.translationProvider('assets/resources/locale-'); // Required: initializes the translation provider with the given path prefix.
+    this.localization.updateTranslation(); // Need to update the translation.
     componentsHelper.setRootViewContainerRef(vcr);
   }
 
@@ -72,6 +88,14 @@ export class AppComponent implements OnInit {
 
     this.refreshFinishedGamesTotalCount();
     this.refreshFinishedGames();
+  }
+
+  // Sets a new locale & currency.
+  public selectLocale(language: string, country: string, currency: string): void {
+
+    this.locale.setCurrentLocale(language, country);
+    this.locale.setCurrentCurrency(currency);
+
   }
 
   private refreshFinishedGames() {
@@ -157,5 +181,9 @@ export class AppComponent implements OnInit {
       }
     }
     return null;
+  }
+
+  get lang(): string{
+    return this.locale.getCurrentLanguage();
   }
 }

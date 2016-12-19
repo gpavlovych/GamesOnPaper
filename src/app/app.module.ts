@@ -34,8 +34,10 @@ import {FinishGameRowComponent} from './finish-game-row/finish-game-row.componen
 import {UserInfoService} from "./user-info.service";
 import {GameComponent} from './game/game.component';
 import {GameTicTacToeService} from './game-tic-tac-toe.service';
-import { GameDotsComponent } from './game-dots/game-dots.component';
+import {GameDotsComponent} from './game-dots/game-dots.component';
 import {GameDotsService} from "./game-dots.service";
+// Angular 2 Localization.
+import {LocaleModule,LocalizationModule} from 'angular2localization';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -77,6 +79,8 @@ const appRoutes: Routes = [
     ModalModule,
     DropdownModule,
     PaginationModule,
+    LocalizationModule.forRoot(),
+    LocaleModule.forRoot(),
     RouterModule.forRoot(appRoutes)
   ],
   providers: [

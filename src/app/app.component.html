@@ -3,8 +3,8 @@
     <div class="navbar-header">
       <a class="navbar-brand" [routerLink]="['/']">Games on paper</a>
     </div>
-    <template [ngIf]="currentUser!=null">
-      <ul class="nav navbar-nav">
+    <ul class="nav navbar-nav">
+      <template [ngIf]="currentUser!=null">
         <li dropdown>
           <a class="dropdown-toggle" dropdownToggle>Create game</a>
           <ul class="dropdown-menu" dropdownMenu>
@@ -63,7 +63,17 @@
             <li *ngIf="finishedGamesTotalCount>10"><a [routerLink]="['/']">Show more</a></li>
           </ul>
         </li>
-      </ul>
+      </template>
+      <li dropdown>
+        <a class="dropdown-toggle" dropdownToggle>ыы{{ 'CHANGE_COUNTRY' | translate:lang }}</a>
+        <ul class="dropdown-menu" dropdownMenu>
+          <li><a (click)="selectLocale('en', 'US', 'USD')">United States</a></li>
+          <li><a (click)="selectLocale('ru', 'RU', 'RUB')">Русский</a></li>
+          <li><a (click)="selectLocale('uk', 'UA', 'HRN')">Українська</a></li>
+        </ul>
+      </li>
+    </ul>
+    <template [ngIf]="currentUser!=null">
       <ul class="nav navbar-nav navbar-right">
         <li><a class="navbar-brand"><strong><span><app-user-avatar [userDetails]="currentUser"></app-user-avatar></span>Welcome, {{currentUser.username}}</strong></a></li>
         <li><a [routerLink]="['/login']" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span>Logout</strong></a></li>

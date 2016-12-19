@@ -1,4 +1,4 @@
-import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
+import {Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod, ConnectionBackend} from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import {GameDefinitionInfo, GameDefinitionDetails, GameDefinition} from "./game-definition";
 import {GameInfo, Game, GameDetails} from "./game";
@@ -31,6 +31,12 @@ export let fakeBackendProvider = {
 //      console.log('connection!');
       // wrap in timeout to simulate server api call
       setTimeout(() => {
+        console.log("url:"+connection.request.url);
+        if (!connection.request.url.startsWith("/api/")) {
+          console.log("not an api call");
+          return;
+        }
+
         let users: User[] = JSON.parse(localStorage.getItem('users')) || [];
         let gameDefinitions: GameDefinition[] = [{
           id: 1,
@@ -43,10 +49,9 @@ export let fakeBackendProvider = {
         }];
           let games: Game[] = JSON.parse(localStorage.getItem('games')) || [];
         let gameFinishRequests: GameFinishRequest[] = JSON.parse(localStorage.getItem('gameFinishRequests')) || [];
-        console.log("url:"+connection.request.url);
 
-        function makeTurnDots(game: Game, indexX: number, indexY: number, currentUserId: any){
-          console.log("rowIndex "+indexX+":"+"columnIndex "+indexX+" turn");
+        function makeTurnDots(game: Game, indexX: number, indexY: number, currentUserId: any) {
+          console.log("rowIndex " + indexX + ":" + "columnIndex " + indexX + " turn");
           let data: GameDotsData = game.data;
           let dot = data.dots[indexX][indexY];
           if (game.state != GameState.active || dot == null || (!dot.free) || dot.playerIndex != null || game.playerIds[data.activePlayer] != currentUserId) {
@@ -99,7 +104,7 @@ export let fakeBackendProvider = {
 
             function findCycle(u: number, v: number) {
               marked[v] = true;
-              for (let w=0; w < list.length; w++) {
+              for (let w = 0; w < list.length; w++) {
                 if (cycle) return;
                 if (isConnected(v, w)) {
                   if (!marked.hasOwnProperty(w)) {
@@ -196,10 +201,12 @@ export let fakeBackendProvider = {
                     y: indexY
                   }, poly.path);
               }
+
               if (!containsInPoly) {
                 return true;
               }
             }
+
             return false;
           }
 
@@ -228,6 +235,7 @@ export let fakeBackendProvider = {
                 }
               }
             }
+
             while (lostPoints.length > 0) {
               let pointInfo = lostPoints.pop();
               data.dots[pointInfo.x][pointInfo.y].playerIndex = 1 - data.dots[pointInfo.x][pointInfo.y].playerIndex;
@@ -240,13 +248,14 @@ export let fakeBackendProvider = {
                 });
               }
             }
+
             countScores();
             countRemainingMoves();
-            data.activePlayer = 1-data.activePlayer;
+            data.activePlayer = (data.activePlayer + 1) % game.playerIds.length;
             return true;
           }
-          return false;
 
+          return false;
         }
 
         function checkCell(game: Game, rowIndex: number, columnIndex: number, currentUserId: any): boolean {
