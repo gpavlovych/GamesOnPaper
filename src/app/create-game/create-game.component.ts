@@ -5,13 +5,12 @@ import {GameService} from "../game.service";
 import {ActivatedRoute} from "@angular/router";
 import {UserService} from "../user.service";
 import {AlertService} from "../alert.service";
-import {GameTicTacToeData} from "../game-tic-tac-toe/game-tic-tac-toe-data";
-import {GameDetails} from "../game";
 import {ConfirmationService} from "../confirmation.service";
 import {CreateGameViewModel} from "../view-models/create-game-view-model";
-import {AuthenticationService} from "../authentication.service";
 import {RefreshService} from "../refresh.service";
 import {UserInfoService} from "../user-info.service";
+import {TranslateService} from "ng2-translate";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-create-game',
@@ -29,6 +28,7 @@ export class CreateGameComponent implements OnInit {
   usersTotalCount: number = 0;
   gameDefinition: GameDefinitionDetails = null;
   gameDefinitionId: any = null;
+  gameDefinitionTranslated: any;
 
   constructor(private gameService: GameService,
               private userService: UserService,
@@ -36,7 +36,8 @@ export class CreateGameComponent implements OnInit {
               private route: ActivatedRoute,
               private confirmationService: ConfirmationService,
               private refreshService: RefreshService,
-              private userInfoService: UserInfoService) {
+              private userInfoService: UserInfoService,
+              private translateService: TranslateService) {
   }
 
   // Load data ones componet is ready
@@ -61,7 +62,12 @@ export class CreateGameComponent implements OnInit {
   }
 
   private refreshGameDefinition() {
-    this.gameService.getGameDefinitionDetails(this.gameDefinitionId).subscribe(data => this.gameDefinition = data);
+    this.gameService.getGameDefinitionDetails(this.gameDefinitionId).subscribe(data => {
+      this.gameDefinition = data;
+      this.translateService.get(this.gameDefinition.name).subscribe(translated => {
+        this.gameDefinitionTranslated = {name: translated};
+      });
+    });
   }
 
   private refreshCurrentUser() {
@@ -95,32 +101,41 @@ export class CreateGameComponent implements OnInit {
   inviteUser(user: UserInfo) {
     if (this.currentUser != null) {
       let isOtherUser = user.id != this.currentUser.id;
-      let confirmationMessage: string;
+      let confirmationMessage: Observable<string>;
       if (isOtherUser) {
-        confirmationMessage = "Do you really want to play with user " + user.userName + "?";
+        confirmationMessage = this.translateService.get("WANT_PLAY_USER", user);
       }
       else {
-        confirmationMessage = "Do you really want to play with yourself?"
+        confirmationMessage = this.translateService.get("WANT_PLAY_YOURSELF");
       }
-
-      this.confirmationService.confirm(confirmationMessage, "Invite user").then(isOk => {
-        if (isOk) {
-          this.gameService.create(<CreateGameViewModel>{
-            playerIds: [user.id],
-            gameDefinitionId: this.gameDefinition.id
-          }).subscribe(gameId => {
-            let alertMessage: string;
-            if (isOtherUser) {
-              alertMessage = "You've just invited user " + user.userName + " to play the " + this.gameDefinition.name + "!";
-            }
-            else {
-              alertMessage = "You've just started playing the " + this.gameDefinition.name + " with yourself";
-            }
-
-            this.alertService.successWithLink(alertMessage, "/game/" + gameId, "Go to game");
-            this.refreshService.refresh();
-          });
-        }
+        this.translateService.get("INVITE_USER").subscribe(headerTranslation => {
+          confirmationMessage.subscribe(confirmationMessageTranslation => {
+            this.confirmationService.confirm(confirmationMessageTranslation, headerTranslation).then(isOk => {
+              if (isOk) {
+                this.gameService.create(<CreateGameViewModel>{
+                  playerIds: [user.id],
+                  gameDefinitionId: this.gameDefinition.id
+                }).subscribe(gameId => {
+                  let alertMessage: Observable<string>;
+                  if (isOtherUser) {
+                    alertMessage = this.translateService.get("INVITED_USER", {
+                      userName: user.userName,
+                      gameDefinitionName: this.gameDefinitionTranslated.name
+                    });
+                  }
+                  else {
+                    alertMessage = this.translateService.get("INVITED_YOURSELF", this.gameDefinitionTranslated);
+                  }
+                  alertMessage.subscribe(alertMessageTranslation => {
+                    this.translateService.get("GO_TO_GAME").subscribe(linkNameTranslation => {
+                      this.alertService.successWithLink(alertMessageTranslation, "/game/" + gameId, linkNameTranslation);
+                      this.refreshService.refresh();
+                    });
+                  });
+                });
+              }
+            });
+        });
       });
     }
   }

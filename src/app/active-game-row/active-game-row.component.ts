@@ -7,6 +7,7 @@ import {RefreshService} from "../refresh.service";
 import {UserInfoService} from "../user-info.service";
 import {UserDetails, UserInfo} from "../user";
 import {GameFinishRequestInfo} from "../game-finish-request-info";
+import {TranslateService} from "ng2-translate";
 
 @Component({
   selector: 'app-active-game-row',
@@ -26,7 +27,8 @@ export class ActiveGameRowComponent implements OnInit, OnChanges {
               private userInfoService: UserInfoService,
               private gameService: GameService,
               private alertService: AlertService,
-              private refreshService: RefreshService) {
+              private refreshService: RefreshService,
+              private translateService: TranslateService) {
   }
 
 
@@ -67,13 +69,27 @@ export class ActiveGameRowComponent implements OnInit, OnChanges {
 
   finish(game: GameInfo) {
     if (this.currentUser != null) {
-      this.confirmationService.confirm(ActiveGameRowComponent.isAutoFinished(game) ? "Do you really want to finish the game?" : "Do you want to request the game finish?", "Finish the game").then(isOk => {
-        if (isOk) {
-          this.gameService.requestFinish({gameId: game.id}).subscribe(() => {
-            this.alertService.success("You've just requested the game finish");
-            this.refreshService.refresh();
+      let message = "WANT_REQUEST_FINISH";
+      if (ActiveGameRowComponent.isAutoFinished(game)) {
+        message = "WANT_FINISH";
+      }
+
+      let header = "FINISH_GAME";
+
+      this.translateService.get(header).subscribe(headerTranslation => {
+        this.translateService.get(message).subscribe(messageTranslation => {
+          this.confirmationService.confirm(messageTranslation, headerTranslation).then(isOk => {
+            if (isOk) {
+              this.gameService.requestFinish({gameId: game.id}).subscribe(() => {
+                let successMessage = "FINISH_REQUESTED";
+                this.translateService.get(successMessage).subscribe(successMessageTranslation => {
+                  this.alertService.success(successMessageTranslation);
+                  this.refreshService.refresh();
+                });
+              });
+            }
           });
-        }
+        });
       });
     }
   }
@@ -91,26 +107,44 @@ export class ActiveGameRowComponent implements OnInit, OnChanges {
 
   finishApprove(gameFinishRequest: GameFinishRequestInfo) {
     if (this.currentUser != null) {
-      this.confirmationService.confirm("Do you want to approve the game finish request from " + gameFinishRequest.createdBy.userName + "?", "Finish the game").then(isOk => {
-        if (isOk) {
-          this.gameService.requestFinishApprove(gameFinishRequest.id).subscribe(() => {
-            this.alertService.success("You've just approved the game finish request from " + gameFinishRequest.createdBy.userName);
-            this.refreshService.refresh();
+      let messageQuestion = "WANT_FINISH_APPROVE";
+      let header = "FINISH_GAME";
+      this.translateService.get(header).subscribe(headerTranslation => {
+        this.translateService.get(messageQuestion, gameFinishRequest.createdBy).subscribe(messageQuestionTranslation => {
+          this.confirmationService.confirm(messageQuestionTranslation, headerTranslation).then(isOk => {
+            if (isOk) {
+              this.gameService.requestFinishApprove(gameFinishRequest.id).subscribe(() => {
+                let successMessage = "FINISH_APPROVED";
+                this.translateService.get(successMessage, gameFinishRequest.createdBy).subscribe(successMessageTranslation => {
+                  this.alertService.success(successMessageTranslation);
+                  this.refreshService.refresh();
+                });
+              });
+            }
           });
-        }
+        });
       });
     }
   }
 
   finishDecline(gameFinishRequest: GameFinishRequestInfo) {
     if (this.currentUser != null) {
-      this.confirmationService.confirm("Do you want to decline the game finish request from " + gameFinishRequest.createdBy.userName + "?", "Finish the game").then(isOk => {
-        if (isOk) {
-          this.gameService.requestFinishDecline(gameFinishRequest.id).subscribe(() => {
-            this.alertService.success("You've just declined the game finish request from " + gameFinishRequest.createdBy.userName);
-            this.refreshService.refresh();
+      let messageQuestion = "WANT_FINISH_DECLINE";
+      let header = "FINISH_GAME";
+      this.translateService.get(header).subscribe(headerTranslation => {
+        this.translateService.get(messageQuestion, gameFinishRequest.createdBy).subscribe(messageQuestionTranslation => {
+          this.confirmationService.confirm(messageQuestionTranslation, headerTranslation).then(isOk => {
+            if (isOk) {
+              this.gameService.requestFinishDecline(gameFinishRequest.id).subscribe(() => {
+                let successMessage = "FINISH_DECLINED";
+                this.translateService.get(successMessage, gameFinishRequest.createdBy).subscribe(successMessageTranslation => {
+                  this.alertService.success(successMessageTranslation);
+                  this.refreshService.refresh();
+                });
+              });
+            }
           });
-        }
+        });
       });
     }
   }

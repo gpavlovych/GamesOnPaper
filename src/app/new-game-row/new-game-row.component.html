@@ -10,13 +10,13 @@
         <span class="label label-default">{{newGame.players[0].userName}}</span>
       </td>
       <td style="white-space: nowrap;overflow: hidden">
-        invited you to play {{newGame.gameDefinition.name}}!
+        {{'INVITED_YOU_TO_PLAY'| translate:newGameTranslated}}
       </td>
       <td>
-        <button type="button" class="btn btn-default" (click)="accept(newGame)"><span class="glyphicon glyphicon-ok"></span>Accept</button>
+        <button type="button" class="btn btn-default" (click)="accept()"><span class="glyphicon glyphicon-ok"></span>{{'ACCEPT' | translate}}</button>
       </td>
       <td>
-        <button type="button" class="btn btn-default" (click)="decline(newGame)"><span class="glyphicon glyphicon-remove"></span>Decline</button>
+        <button type="button" class="btn btn-default" (click)="decline()"><span class="glyphicon glyphicon-remove"></span>{{'DECLINE' | translate}}</button>
       </td>
     </tr>
   </table>
@@ -34,9 +34,11 @@
           </td>
         </template>
       </template>
-      <td style="white-space: nowrap;overflow: hidden"> invited to play {{newGame.gameDefinition.name}} with you!</td>
+      <td style="white-space: nowrap;overflow: hidden">
+        {{'INVITED_TO_PLAY'| translate:newGameTranslated}}
+      </td>
       <td>
-        <button type="button" class="btn btn-default" (click)="decline(newGame)"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+        <button type="button" class="btn btn-default" (click)="cancel()"><span class="glyphicon glyphicon-remove"></span>{{'CANCEL' | translate}}</button>
       </td>
     </tr>
   </table>

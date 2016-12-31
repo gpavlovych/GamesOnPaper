@@ -3,12 +3,12 @@
     <tr>
       <template [ngIf]="withYourself">
         <td style="white-space: nowrap; overflow: hidden">
-          Playing with yourself&nbsp;
+          {{'PLAYING_WITH_YOURSELF' | translate}}&nbsp;
         </td>
       </template>
       <template [ngIf]="!withYourself">
         <td style="white-space: nowrap; overflow: hidden">
-          Playing with:&nbsp;
+          {{'PLAYING_WITH' | translate}}&nbsp;
         </td>
         <template ngFor let-player [ngForOf]="activeGame.players">
           <template [ngIf]="player.id != currentUser.id">
@@ -25,11 +25,11 @@
       </template>
       <td>
         <a [routerLink]="['/game/'+activeGame.id]" class="btn btn-default">
-          Go to
+          {{'GO_TO' | translate}}
         </a>
       </td>
       <td *ngIf="!activeFinishRequests[activeGame.id]" >
-        <button type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>Finish</button>
+        <button type="button" class="btn btn-default" (click)="finish(activeGame)"><span class="glyphicon glyphicon-remove"></span>{{'FINISH' | translate}}</button>
       </td>
     </tr>
   </table>
@@ -38,23 +38,23 @@
       <template [ngIf]="activeFinishRequests[activeGame.id].createdBy.id != currentUser.id">
         <tr>
           <td style="white-space: nowrap; overflow: hidden">
-            {{activeFinishRequests[activeGame.id].createdBy.userName}} wants to finish the game.
+            {{'USER_WANTS_TO_FINISH' | translate:activeFinishRequests[activeGame.id].createdBy}}
           </td>
           <td>
-            <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-ok"></span>Accept</button>
+            <button type="button" class="btn btn-default" (click)="finishApprove(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-ok"></span>{{'ACCEPT' | translate}}</button>
           </td>
           <td>
-            <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>Decline</button>
+            <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>{{'DECLINE' | translate}}</button>
           </td>
         </tr>
       </template>
       <template [ngIf]="activeFinishRequests[activeGame.id].createdBy.id == currentUser.id">
         <tr>
           <td style="white-space: nowrap; overflow: hidden">
-            You want to finish the game. Waiting for opponent decision.
+            {{'YOU_WANT_TO_FINISH' | translate}}
           </td>
           <td>
-            <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>Cancel</button>
+            <button type="button" class="btn btn-default" (click)="finishDecline(activeFinishRequests[activeGame.id])"><span class="glyphicon glyphicon-remove"></span>{{'CANCEL' | translate}}</button>
           </td>
         </tr>
       </template>

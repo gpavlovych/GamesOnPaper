@@ -1,8 +1,8 @@
 <div class="col-sm-4 col-sm-offset-4">
-    <h1>Register New User</h1>
+    <h1>{{'REGISTER_FORM' | translate}}</h1>
     <form (ngSubmit)="onSubmit()" #userForm="ngForm">
       <div class="form-group">
-        <label for="firstName">Sex</label>
+        <label for="firstName">{{'SEX' | translate}}</label>
         <div *ngFor="let choice of Sex | keys">
           <input type="radio"
                  name="sex"
@@ -13,51 +13,51 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="firstName">First Name</label>
+        <label for="firstName">{{'FIRST_NAME' | translate}}</label>
         <input type="text" class="form-control" id="firstName"
                required
                [(ngModel)]="user.firstName" name="firstName"
                #firstName="ngModel" >
         <div [hidden]="firstName.valid || firstName.pristine"
              class="alert alert-danger">
-          First Name is required
+          {{'FIRST_NAME_REQUIRED' | translate}}
         </div>
       </div>
       <div class="form-group">
-        <label for="lastName">Last Name</label>
+        <label for="lastName">{{'LAST_NAME' | translate}}</label>
         <input type="text" class="form-control" id="lastName"
                required
                [(ngModel)]="user.lastName" name="lastName"
                #lastName="ngModel" >
         <div [hidden]="lastName.valid || lastName.pristine"
              class="alert alert-danger">
-          Last Name is required
+          {{'LAST_NAME_REQUIRED' | translate}}
         </div>
       </div>
       <div class="form-group">
-        <label for="username">Account</label>
+        <label for="username">{{'ACCOUNT' | translate}}</label>
         <input type="text" class="form-control" id="username"
                required
                [(ngModel)]="user.username" name="username"
                #username="ngModel" >
         <div [hidden]="username.valid || username.pristine"
              class="alert alert-danger">
-          Account is required
+          {{'ACCOUNT_REQUIRED' | translate}}
         </div>
       </div>
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password">{{'PASSWORD' | translate}}</label>
         <input type="password" class="form-control" id="password"
                required
                [(ngModel)]="user.password" name="password"
                #password="ngModel" >
         <div [hidden]="password.valid || password.pristine"
              class="alert alert-danger">
-          Password is required
+          {{'PASSWORD_REQUIRED' | translate}}
         </div>
       </div>
-      <button type="submit" [disabled]="loading || !userForm.form.valid" class="btn btn-primary">Register</button>
+      <button type="submit" [disabled]="loading || !userForm.form.valid" class="btn btn-primary">{{'REGISTER_SUBMIT' | translate}}</button>
       <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-      <a [routerLink]="['/login']" class="btn btn-link">Cancel</a>
+      <a [routerLink]="['/login']" class="btn btn-link">{{'CANCEL' | translate}}</a>
     </form>
 </div>

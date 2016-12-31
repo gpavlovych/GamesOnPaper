@@ -1,82 +1,82 @@
 <nav class="navbar navbar-default navbar-static-top">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" [routerLink]="['/']">Games on paper</a>
+      <a class="navbar-brand" [routerLink]="['/']">{{'GAMES_ON_PAPER' | translate}}</a>
     </div>
     <ul class="nav navbar-nav">
       <template [ngIf]="currentUser!=null">
         <li dropdown>
-          <a class="dropdown-toggle" dropdownToggle>Create game</a>
+          <a class="dropdown-toggle" dropdownToggle>{{'CREATE_GAME' | translate}}</a>
           <ul class="dropdown-menu" dropdownMenu>
-            <li class="dropdown-header">Invite user to play</li>
+            <li class="dropdown-header">{{'INVITE_USERS_TO_PLAY' | translate}}</li>
             <li *ngFor="let gameToBeCreated of gamesToBeCreated">
               <a [routerLink]="['/creategame/'+gameToBeCreated.id]">
-                <span><img class="img-circle" width="24" height="24" src="{{gameToBeCreated.icon}}"/></span> {{gameToBeCreated.name}}
+                <span><img class="img-circle" width="24" height="24" src="{{gameToBeCreated.icon}}"/></span> {{gameToBeCreated.name | translate}}
               </a>
             </li>
-            <li *ngIf="gamesToBeCreatedTotalCount>gamesToBeCreatedTop"><a [routerLink]="['/']">Show more</a></li>
+            <li *ngIf="gamesToBeCreatedTotalCount>gamesToBeCreatedTop"><a [routerLink]="['/']">{{'SHOW_MORE' | translate}}</a></li>
           </ul>
         </li>
         <li dropdown>
-          <a class="dropdown-toggle" dropdownToggle>Invitations: <span class="glyphicon glyphicon-arrow-down"></span><span class="badge">{{incomingInvitationsTotalCount}}</span> <span class="glyphicon glyphicon-arrow-up"></span><span class="badge">{{outgoingInvitationsTotalCount}}</span></a>
+          <a class="dropdown-toggle" dropdownToggle>{{'INVITATIONS' | translate}}&nbsp;<span class="glyphicon glyphicon-arrow-down"></span><span class="badge">{{incomingInvitationsTotalCount}}</span> <span class="glyphicon glyphicon-arrow-up"></span><span class="badge">{{outgoingInvitationsTotalCount}}</span></a>
           <ul class="dropdown-menu" dropdownMenu>
-            <li class="dropdown-header">Incoming invitations</li>
+            <li class="dropdown-header">{{'INCOMING_INVITATIONS' | translate}}</li>
             <template ngFor let-incomingInvitation [ngForOf]="incomingInvitations">
               <li>
                 <app-new-game-row [newGame]="incomingInvitation"></app-new-game-row>
               </li>
             </template>
-            <li *ngIf="incomingInvitationsTotalCount>incomingInvitationsTop"><a [routerLink]="['/']">Show more</a></li>
+            <li *ngIf="incomingInvitationsTotalCount>incomingInvitationsTop"><a [routerLink]="['/']">{{'SHOW_MORE' | translate}}</a></li>
             <li class="divider"></li>
-            <li class="dropdown-header">Outgoing invitations</li>
+            <li class="dropdown-header">{{'OUTGOING_INVITATIONS' | translate}}</li>
             <template ngFor let-outgoingInvitation [ngForOf]="outgoingInvitations">
               <li>
                 <app-new-game-row [newGame]="outgoingInvitation"></app-new-game-row>
               </li>
             </template>
-            <li *ngIf="outgoingInvitationsTotalCount>outgoingInvitationsTop"><a [routerLink]="['/']">Show more</a></li>
+            <li *ngIf="outgoingInvitationsTotalCount>outgoingInvitationsTop"><a [routerLink]="['/']">{{'SHOW_MORE' | translate}}</a></li>
           </ul>
         </li>
         <li dropdown>
-          <a class="dropdown-toggle" dropdownToggle>Active Games <span class="badge">{{activeGamesTotalCount}}</span></a>
+          <a class="dropdown-toggle" dropdownToggle>{{'ACTIVE_GAMES' | translate}} <span class="badge">{{activeGamesTotalCount}}</span></a>
           <ul class="dropdown-menu" dropdownMenu>
             <template ngFor let-game [ngForOf]="activeGames | groupBy: 'gameDefinition.name'">
-              <li class="dropdown-header">{{game.key}}</li>
+              <li class="dropdown-header">{{game.key | translate}}</li>
               <li *ngFor="let activeGame of game.value">
                 <app-active-game-row [activeGame]="activeGame" [activeFinishRequests]="activeFinishRequests"></app-active-game-row>
               </li>
-              <li *ngIf="activeGamesTotalCount>10"><a [routerLink]="['/']">Show more</a></li>
+              <li *ngIf="activeGamesTotalCount>10"><a [routerLink]="['/']">{{'SHOW_MORE' | translate}}</a></li>
               <li class="divider"></li>
             </template>
           </ul>
         </li>
         <li dropdown>
-          <a class="dropdown-toggle" dropdownToggle>Finished Games <span class="badge">{{finishedGamesTotalCount}}</span></a>
+          <a class="dropdown-toggle" dropdownToggle>{{'FINISHED_GAMES' | translate}}&nbsp;<span class="badge">{{finishedGamesTotalCount}}</span></a>
           <ul class="dropdown-menu" dropdownMenu>
             <template ngFor let-game [ngForOf]="finishedGames | groupBy: 'gameDefinition.name'">
-              <li class="dropdown-header">{{game.key}}</li>
+              <li class="dropdown-header">{{game.key | translate}}</li>
               <li *ngFor="let finishedGame of game.value">
                 <app-finish-game-row [finishedGame]="finishedGame"></app-finish-game-row>
               </li>
               <li class="divider"></li>
             </template>
-            <li *ngIf="finishedGamesTotalCount>10"><a [routerLink]="['/']">Show more</a></li>
+            <li *ngIf="finishedGamesTotalCount>10"><a [routerLink]="['/']">{{'SHOW_MORE' | translate}}</a></li>
           </ul>
         </li>
       </template>
       <li dropdown>
-        <a class="dropdown-toggle" dropdownToggle>ыы{{ 'CHANGE_COUNTRY' | translate:lang }}</a>
+        <a class="dropdown-toggle" dropdownToggle>{{ 'CHANGE_COUNTRY' | translate }}</a>
         <ul class="dropdown-menu" dropdownMenu>
-          <li><a (click)="selectLocale('en', 'US', 'USD')">United States</a></li>
-          <li><a (click)="selectLocale('ru', 'RU', 'RUB')">Русский</a></li>
-          <li><a (click)="selectLocale('uk', 'UA', 'HRN')">Українська</a></li>
+          <li><a (click)="selectLocale('en')">{{'EN_LANGUAGE' | translate}}</a></li>
+          <li><a (click)="selectLocale('ru')">{{'RU_LANGUAGE' | translate}}</a></li>
+          <li><a (click)="selectLocale('uk')">{{'UA_LANGUAGE' | translate}}</a></li>
         </ul>
       </li>
     </ul>
     <template [ngIf]="currentUser!=null">
       <ul class="nav navbar-nav navbar-right">
-        <li><a class="navbar-brand"><strong><span><app-user-avatar [userDetails]="currentUser"></app-user-avatar></span>Welcome, {{currentUser.username}}</strong></a></li>
-        <li><a [routerLink]="['/login']" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span>Logout</strong></a></li>
+        <li><a class="navbar-brand"><strong><span><app-user-avatar [userDetails]="currentUser"></app-user-avatar></span>{{'WELCOME_USER' | translate:currentUser}}</strong></a></li>
+        <li><a [routerLink]="['/login']" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span>{{'LOGOUT' | translate}}</strong></a></li>
       </ul>
     </template>
   </div>

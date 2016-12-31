@@ -8,6 +8,7 @@ import {ActivatedRoute} from "@angular/router";
 import {GameTicTacToeComponent} from "../game-tic-tac-toe/game-tic-tac-toe.component";
 import {AlertService} from "../alert.service";
 import {GameState} from "../game-state.enum";
+import {TranslateService} from "ng2-translate";
 
 @Component({
   selector: 'app-game',
@@ -25,7 +26,8 @@ export class GameComponent implements OnInit {
               private userInfoService: UserInfoService,
               private route: ActivatedRoute,
               private gameService: GameService,
-              private alertService: AlertService) {
+              private alertService: AlertService,
+              private translateService: TranslateService) {
   }
 
   ngOnInit() {
@@ -62,14 +64,20 @@ export class GameComponent implements OnInit {
     if ((newGame != null && newGame.state == GameState.finished) && (oldGame != null && oldGame.state == GameState.active)) {
       if (newGame.winner != null) {
         if (newGame.winner.id == this.currentUser.id) {
-          this.alertService.success("Congratulations! You've just won the game!");
+          this.translateService.get("WON_MESSAGE").subscribe(wonMessageTranslation => {
+            this.alertService.success(wonMessageTranslation);
+          });
         }
         else {
-          this.alertService.success("Uh-oh! You've just lose the game...");
+          this.translateService.get("LOSE_MESSAGE").subscribe(loseMessageTranslation => {
+            this.alertService.success(loseMessageTranslation);
+          });
         }
       }
       else {
-        this.alertService.success("Draw!")
+        this.translateService.get("DRAW").subscribe(drawTranslation => {
+          this.alertService.success(drawTranslation);
+        });
       }
     }
   }

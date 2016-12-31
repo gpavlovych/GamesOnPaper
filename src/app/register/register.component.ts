@@ -5,6 +5,7 @@ import { UserService } from "../user.service";
 import { Router } from "@angular/router";
 import {CreateUserViewModel} from "../view-models/create-user-view-model";
 import {Sex} from "../sex.enum";
+import {TranslateService} from "ng2-translate";
 
 @Component({
   selector: 'app-register',
@@ -14,7 +15,8 @@ import {Sex} from "../sex.enum";
 export class RegisterComponent implements OnInit {
   constructor( private router: Router,
                private userService: UserService,
-               private alertService: AlertService) { }
+               private alertService: AlertService,
+               private translateService: TranslateService) { }
 
   ngOnInit() {
     this.newUser();
@@ -37,8 +39,10 @@ export class RegisterComponent implements OnInit {
       .create(this.user)
       .subscribe(() => {
           // set success message and pass true paramater to persist the message after redirecting to the login page
-          this.alertService.success('Registration successful', true);
-          this.router.navigate(['/login']);
+          this.translateService.get("REGISTRATION_SUCCESS").subscribe(successTranslation=> {
+            this.alertService.success(successTranslation, true);
+            this.router.navigate(['/login']);
+          });
         },
         error => {
           this.alertService.error(error);

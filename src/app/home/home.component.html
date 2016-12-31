@@ -1,13 +1,13 @@
 <div class="row">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Create Game</h3>
+      <h3 class="panel-title">{{'CREATE_GAME' | translate}}</h3>
     </div>
     <div class="panel-body">
-      <h4>Invite users to play</h4>
+      <h4>{{'INVITE_USERS_TO_PLAY' | translate}}</h4>
       <table class="table">
         <tr *ngFor="let gameToBeCreated of gamesToBeCreated">
-          <td><a href="creategame/{{gameToBeCreated.id}}">{{gameToBeCreated.name}}</a></td>
+          <td><a href="creategame/{{gameToBeCreated.id}}">{{gameToBeCreated.name | translate}}</a></td>
         </tr>
       </table>
     </div>
@@ -23,10 +23,10 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Incoming invitations</h3>
+      <h3 class="panel-title">{{'INCOMING_INVITATIONS' | translate}}</h3>
     </div>
     <div class="panel-body">
-      <h4>Invitations you've received</h4>
+      <h4>{{'INCOMING_INVITATIONS_DESCRIPTION' | translate}}</h4>
       <table class="table">
         <tr *ngFor="let incomingInvitation of incomingInvitations">
           <td>
@@ -47,10 +47,10 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Outgoing invitations</h3>
+      <h3 class="panel-title">{{'OUTGOING_INVITATIONS' | translate}}</h3>
     </div>
     <div class="panel-body">
-      <h4>Invitations you've sent</h4>
+      <h4>{{'OUTGOING_INVITATIONS_DESCRIPTION' | translate}}</h4>
       <table class="table">
         <tr *ngFor="let outgoingInvitation of outgoingInvitations">
           <td>
@@ -71,14 +71,14 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Active Games</h3>
+      <h3 class="panel-title">{{'ACTIVE_GAMES' | translate}}</h3>
     </div>
     <div class="panel-body">
-      <h4>Games which are being played now</h4>
+      <h4>{{'ACTIVE_GAMES_DESCRIPTION' | translate}}</h4>
       <table class="table">
         <template ngFor let-activeGameGrouped [ngForOf]="activeGames  | groupBy: 'gameDefinition.name'">
           <tr>
-            <td><h5>{{activeGameGrouped.key}}</h5></td>
+            <td><h5>{{activeGameGrouped.key | translate}}</h5></td>
           </tr>
           <template ngFor let-activeGame [ngForOf]="activeGameGrouped.value">
             <tr>
@@ -102,14 +102,14 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Finished Games</h3>
+      <h3 class="panel-title">{{'FINISHED_GAMES' | translate}}</h3>
     </div>
     <div class="panel-body">
-      <h4>Games which are finished</h4>
+      <h4>{{'FINISHED_GAMES_DESCRIPTION' | translate}}</h4>
       <table class="table">
         <template ngFor let-finishedGameGrouped [ngForOf]="finishedGames  | groupBy: 'gameDefinition.name'">
           <tr>
-            <td><h5>{{finishedGameGrouped.key}}</h5></td>
+            <td><h5>{{finishedGameGrouped.key | translate}}</h5></td>
           </tr>
           <template ngFor let-finishedGame [ngForOf]="finishedGameGrouped.value">
             <tr>

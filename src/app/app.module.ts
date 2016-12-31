@@ -37,7 +37,7 @@ import {GameTicTacToeService} from './game-tic-tac-toe.service';
 import {GameDotsComponent} from './game-dots/game-dots.component';
 import {GameDotsService} from "./game-dots.service";
 // Angular 2 Localization.
-import {LocaleModule,LocalizationModule} from 'angular2localization';
+import {TranslateModule} from "ng2-translate";
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -79,9 +79,8 @@ const appRoutes: Routes = [
     ModalModule,
     DropdownModule,
     PaginationModule,
-    LocalizationModule.forRoot(),
-    LocaleModule.forRoot(),
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    TranslateModule.forRoot()
   ],
   providers: [
     {
