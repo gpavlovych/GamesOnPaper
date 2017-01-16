@@ -1,10 +1,10 @@
-import { WSStudyAngular2Page } from './app.po';
+import { GamesOnPaperPage } from './app.po';
 
-describe('ws-study-angular2 App', function() {
-  let page: WSStudyAngular2Page;
+describe('games-on-paper App', function() {
+  let page: GamesOnPaperPage;
 
   beforeEach(() => {
-    page = new WSStudyAngular2Page();
+    page = new GamesOnPaperPage();
   });
 
   it('should display message saying app works', () => {

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { RequestOptions, Headers, Response, Http } from "@angular/http";
-import { UserDetails } from "./user";
+import {UserDetails, UserInfo} from "./user";
 import { AuthenticationService } from "./authentication.service";
 import {CreateUserViewModel} from "./view-models/create-user-view-model";
+import {Observable} from "rxjs";
 
 @Injectable()
 export class UserService {
@@ -11,15 +12,15 @@ export class UserService {
     private http: Http,
     private authenticationService: AuthenticationService) { }
 
-  getAll(skip: number, take: number) {
+  getAll(skip: number, take: number): Observable<UserInfo[]> {
     return this.http.get('/api/users?skip=' + skip + '&take=' + take, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  getAllCount() {
+  getAllCount(): Observable<number> {
     return this.http.get('/api/users/count', this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 
-  getById(id: number) {
+  getById(id: number): Observable<UserDetails> {
     return this.http.get('/api/users/' + id, this.authenticationService.getAuthorizedRequestOptions()).map((response: Response) => response.json());
   }
 

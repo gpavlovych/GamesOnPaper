@@ -1,5 +1,4 @@
 import {Component, ViewContainerRef, OnInit} from '@angular/core';
-import {ComponentsHelper} from 'ng2-bootstrap/ng2-bootstrap';
 import {UserDetails} from './user';
 import {GameDefinitionInfo} from './game-definition';
 import {GameInfo} from './game'
@@ -42,8 +41,6 @@ export class AppComponent implements OnInit {
   activeFinishRequests: {} = {};
 
   public constructor(
-    componentsHelper: ComponentsHelper,
-    vcr: ViewContainerRef,
     private gameService: GameService,
     private refreshService: RefreshService,
     private userInfoService: UserInfoService,
@@ -55,8 +52,6 @@ export class AppComponent implements OnInit {
 
     // the lang to use, if the lang isn't available, it will use the current loader to get them
     this.translate.use('en');
-
-    componentsHelper.setRootViewContainerRef(vcr);
   }
 
   ngOnInit() {

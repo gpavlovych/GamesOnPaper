@@ -1,11 +1,11 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {HttpModule, BaseRequestOptions} from '@angular/http';
+import {HttpModule, Http, BaseRequestOptions} from '@angular/http';
 import {RouterModule, Routes} from '@angular/router';
 import {AppComponent} from './app.component';
 import {MystubComponent} from './mystub/mystub.component';
-import {ModalModule, PaginationModule, DropdownModule, ComponentsHelper} from 'ng2-bootstrap/ng2-bootstrap';
+import {ModalModule, PaginationModule, DropdownModule} from 'ng2-bootstrap/ng2-bootstrap';
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 import {HomeComponent} from './home/home.component';
 import {GameTicTacToeComponent} from './game-tic-tac-toe/game-tic-tac-toe.component';
@@ -16,10 +16,8 @@ import {RegisterComponent} from './register/register.component';
 import {Top100playersComponent} from './top100players/top100players.component';
 import {AlertComponent} from './alert/alert.component'
 import {AuthGuard} from "./auth.guard";
-import {MockBackend} from "@angular/http/testing";
 import {AuthenticationService} from "./authentication.service";
 import {AlertService} from "./alert.service";
-import {fakeBackendProvider} from "./fake-backend-provider";
 import {UserService} from "./user.service";
 import {GameService} from "./game.service";
 import {CreateGameComponent} from './create-game/create-game.component';
@@ -37,7 +35,10 @@ import {GameTicTacToeService} from './game-tic-tac-toe.service';
 import {GameDotsComponent} from './game-dots/game-dots.component';
 import {GameDotsService} from "./game-dots.service";
 // Angular 2 Localization.
-import {TranslateModule} from "ng2-translate";
+import {TranslateModule, TranslateLoader, TranslateStaticLoader} from "ng2-translate";
+import {Ng2BootstrapModule} from "ng2-bootstrap";
+import {MockBackend} from "@angular/http/testing";
+import {fakeBackendProvider} from "./fake-backend-provider";
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -79,14 +80,18 @@ const appRoutes: Routes = [
     ModalModule,
     DropdownModule,
     PaginationModule,
+    Ng2BootstrapModule.forRoot(),
     RouterModule.forRoot(appRoutes),
     TranslateModule.forRoot()
+    /*{
+      provide: TranslateLoader,
+      useFactory: (http: Http) => new TranslateStaticLoader(http, '/assets/i18n', '.json'),
+      deps: [Http]
+    }
+    )*/
   ],
   providers: [
-    {
-      provide: ComponentsHelper,
-      useClass: ComponentsHelper
-    },
+
     AuthGuard,
     AlertService,
     ConfirmationService,

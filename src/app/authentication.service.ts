@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Http, Response, RequestOptions, Headers} from '@angular/http';
 import 'rxjs/add/operator/map'
+import {Observable} from "rxjs";
 
 @Injectable()
 export class AuthenticationService {
@@ -17,7 +18,7 @@ export class AuthenticationService {
         }
       });
   }
-  getAuthorizedUserId() {
+  getAuthorizedUserId(): number {
     let currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (currentUser && currentUser.id) {
       return currentUser.id;
