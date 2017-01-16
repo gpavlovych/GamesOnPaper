@@ -1,88 +1,26 @@
+sudo: required
+dist: trusty
 language: node_js
-
 node_js:
-  - 5.4.0
+  - '6.9.1'
 
-# before_install:
-#   - export CHROME_BIN=/usr/bin/google-chrome
-#   - export DISPLAY=:99.0
-#   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
-  # - sudo apt-get update
-  # - sudo apt-get install -y libappindicator1 fonts-liberation
-#   - wget http://deepin.mirror.garr.it/mirrors/deepin/pool/non-free/g/google-chrome-stable/google-chrome-stable_47.0.2526.80-1_amd64.deb
-#   - sudo dpkg -i google-chrome*.deb
-  # - npm install semver
-  # - export NPM_V=$(npm -v)
-  # - 'if node -e "process.exit(require(''semver'').gt(process.env.NPM_V, ''3.0.0''))"; then npm install -g npm@3.0.0; fi'
+addons:
+apt:
+  sources:
+    - google-chrome
+  packages:
+    - google-chrome-stable
+    - google-chrome-beta
 
-install:
-  - npm install
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 
 before_script:
-  # - "npm run webdriver:start &"
+- npm install -g universal-cli
+- npm install -g karma
+- npm install
+- ung build
 
-script:
-  # Linting
-  - npm run lint
-
-  # Minification tests
-  - npm run build
-  - "if [ $(du -k ./dist/public/vendor.js     | cut -f1) -gt 950 ];  then exit 1; fi"
-  - "if [ $(du -k ./dist/public/browser.js    | cut -f1) -gt 10 ];   then exit 1; fi"
-  - "if [ $(du -k ./dist/public/worker.js     | cut -f1) -gt 5 ];    then exit 1; fi"
-  - "if [ $(du -k ./dist/public/worker_app.js | cut -f1) -gt 12 ];   then exit 1; fi"
-
-  # Starting/stopping
-  - npm start
-  - npm stop
-
-  # Unit tests
-  - npm run unit
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - NG2_WW=true  NG2_SS=true  $(npm bin)/pm2 start ecosystem.json
-  # - npm run e2e
-  # - $(npm bin)/pm2 delete ecosystem.json;
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - NG2_WW=false NG2_SS=true  $(npm bin)/pm2 start ecosystem.json
-  # - npm run e2e
-  # - $(npm bin)/pm2 delete ecosystem.json;
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - NG2_WW=false NG2_SS=false $(npm bin)/pm2 start ecosystem.json
-  # - npm run e2e
-  # - $(npm bin)/pm2 delete ecosystem.json;
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - "NG2_WW=true NG2_SS=true npm run dev &"
-  # - DEV_SERVER_PID=$!
-  # - sleep 5
-  # - npm run e2e
-  # - kill $DEV_SERVER_PID
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - "NG2_WW=false NG2_SS=true npm run dev &"
-  # - DEV_SERVER_PID=$!
-  # - sleep 5
-  # - npm run e2e
-  # - kill $DEV_SERVER_PID
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - "NG2_WW=false NG2_SS=false npm run dev &"
-  # - DEV_SERVER_PID=$!
-  # - sleep 5
-  # - npm run e2e
-  # - kill $DEV_SERVER_PID
-
-  # - "kill $(lsof -t -i:3000) | true"
-
-  # - npm restart
-  # - npm test
-  # - npm stop
+script: karma start config/karma.conf.js --single-run
